@@ -1,0 +1,127 @@
+body {
+  font: 14px "Lucida Grande", Helvetica, Arial, sans-serif;
+}
+
+.explain_area {
+  margin-top:50px;
+  text-align:center;
+}
+
+.explain_title{
+  font-size: 48px;
+}
+
+.explain_sub_title{
+  font-size: 24px;
+  margin-bottom: 20px;
+}
+
+.explain_appendix{
+  font-size:20px;
+}
+
+.explain_block{
+  vertical-align:top;
+  display: inline-block;
+  width:400px;
+  height:500px;
+  font-size: 20px;
+  border: solid 1px #999;
+}
+
+.explain_table{
+  font-size:16px;
+  text-align: left;
+  margin-left: 40px;
+}
+
+.vote_area{
+  text-align: center;
+  min-width: 600px;
+}
+
+.vote_title{
+  font-size: 36px;
+  margin-top: 50px;
+}
+
+.yes_button{
+  width:100px;
+  height:100px;
+  background:#F99;
+  border-radius:100%;
+  color: #FFFFFF;
+  font-size: 36px;
+  outline: none;
+  border:none;
+  margin:5%;
+}
+
+.no_button{
+  width:100px;
+  height:100px;
+  background:#99F;
+  border-radius:100%;
+  color: #FFFFFF;
+  font-size: 36px;
+  outline: none;
+  border:none;
+  margin:5%;
+}
+
+.votedYesStyle{
+  background:red;
+}
+
+.votedNoStyle{
+  background: blue;
+}
+
+.one_area{
+  vertical-align:top;
+  display: inline-block;
+  text-align: center;
+  width:160px;
+  height:300px;
+  background-color: #99F;
+  margin-top:20px;
+  margin-right:1px;
+}
+
+.button_area{
+  vertical-align:top;
+  display: inline-block;
+  text-align: center;
+  width:160px;
+  margin-top:20px;
+}
+
+.survey_bar{
+  width:160px;
+  height:300px;
+  background-color: #CCC;
+}
+
+.survey_button_area{
+  width:160px;
+}
+
+.survey_button{
+  width:150px;
+  height:150px;
+  background:#99F;
+  border-radius:100%;
+  color: #FFFFFF;
+  font-size: 16px;
+  outline: none;
+  border:none;
+  margin:auto;
+}
+
+.survey_button:hover{
+  background: #66F;
+}
+
+.survey_button_on{
+  background: blue;
+}

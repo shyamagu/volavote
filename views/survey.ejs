@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title><%= title %></title>
+    <script src="https://cdn.jsdelivr.net/npm/vue@2/dist/vue.js"></script>
+    <script src="/socket.io/socket.io.js"></script>
+    <link rel='stylesheet' href='/stylesheets/style.css' />
+  </head>
+  <body>
+    <div id="app">
+      <div class="vote_area">
+        <div class="vote_title"><%= title %></div>
+        <div v-for="index of num" class="one_area">
+          <div class="survey_bar" :style="`height:${bars[index-1]}px`"></div>
+          {{counts[index-1]}}
+        </div>
+        <br/>
+        <div v-for="index of num" class="button_area">
+          <button class="survey_button" :class="{survey_button_on: voted==index}" @click.prevent="voteSurvey(index)">{{displays[index-1]}}</button>
+        </div>
+
+<!--          <button class="yes_button" :class="{votedYesStyle: votedYes}" :style="`width:${sizeYes}px;height:${sizeYes}px`" @click.prevent="sayYes">Yes<br/>{{countYes}}</button>
+        <button class="no_button" :class="{votedNoStyle: votedNo}" :style="`width:${sizeNo}px;height:${sizeNo}px`" @click.prevent="sayNo">No</br>{{countNo}}</button>
+-->
+      </div>
+    </div>
+  </body>
+  <script>
+    const socket = io();
+    const maxh = 300;
+    var app = new Vue({
+      el: '#app',
+      data: {
+        title: '<%= title %>',
+        num: Number('<%= num %>'),
+        counts: [0,0,0,0,0],
+        displays:['<%= d1 %>','<%= d2 %>','<%= d3 %>','<%= d4 %>','<%= d5 %>'],
+        bars:[maxh,maxh,maxh,maxh,maxh],
+        voted:0,
+        errorMessage: '',
+      },
+      mounted() {
+        socket.emit('voting',this.title)
+        socket.on('voting',(box)=>{
+          if(this.title === box.title){
+            const ss = [Number(box.S1),Number(box.S2),Number(box.S3),Number(box.S4),Number(box.S5)]
+            let total = ss.reduce(function(sum,element){
+              return sum+element;
+            },0)
+            this.counts=[Number(box.S1),Number(box.S2),Number(box.S3),Number(box.S4),Number(box.S5)]
+            this.bars=[maxh-Number(box.S1)*maxh/total,maxh-Number(box.S2)*maxh/total,maxh-Number(box.S3)*maxh/total,maxh-Number(box.S4)*maxh/total,maxh-Number(box.S5)*maxh/total]
+          }
+        })
+      },
+      methods:{
+        voteSurvey: function(index){
+          this.vote({title:this.title, vote:"S"+index, type:"SURVEY"})
+          this.voted = index
+        },
+        vote:function(vote){
+          fetch("/vote",{
+            method:'POST',
+            headers:{'Content-Type':'application/json'},
+            body:JSON.stringify(vote)
+          })
+          .then(response=>{
+            //OK
+          })
+          .catch((error)=>{
+            this.errorMessage = error
+          });
+        },
+      }
+    })
+  </script>
+</html>

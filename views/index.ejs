@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title><%= title %></title>
+    <link rel='stylesheet' href='/stylesheets/style.css' />
+  </head>
+  <body>
+    <div class="explain_area">
+      <div class="explain_title"><%= title %></div>
+      <div class="explain_sub_title">Simple voting web application on memory</div>
+      <div class="explain_sub_title">
+        2 type of survey you can make and share the url to your audience like below.
+        <br>
+        *please note that all data will be lost when server down.(no storage)
+      </div>
+      <div class="explain_block">
+        <a href="<%=url %>alt?title=Do you like an apple?"><%=url %>alt?title=Do you like an apple?</a>
+        <img src="/images/yesno_sample.png" width=400>
+      </div>
+      <div class="explain_block">
+        <a href="<%=url %>survey?title=How about this?&d1=too bad&d2=so so&d5=great!!!"><%=url %>survey?title=How about this?&d1=too bad&d2=so so&d5=great!!!</a>
+        <img src="/images/multi_sample.png" width=400>
+        <div class="explain_table">
+          <table border="1" style="border-collapse: collapse">
+            <tr>
+              <td>parameter</td><td>value</td><td>required</td>
+            </tr>
+            <tr>
+              <td>title</td><td>survey title</td><td>*</td>
+            </tr>
+            <tr>
+              <td>num</td><td>answer-step (max=5)</td><td></td>
+            </tr>
+            <tr>
+              <td>d1</td><td>display name of 1st</td><td></td>
+            </tr>
+            <tr>
+              <td>d2</td><td>display name of 2nd</td><td></td>
+            </tr>
+            <tr>
+              <td>d3</td><td>display name of 3rd</td><td></td>
+            </tr>
+            <tr>
+              <td>d4</td><td>display name of 4th</td><td></td>
+            </tr>
+            <tr>
+              <td>d5</td><td>display name of 5th</td><td></td>
+            </tr>
+          </table>
+        </div>
+      </div>
+    </div>
+    <div class="explain_area">
+      <div class="explain_appendix">if you want to use this app by your own, please use <a href="https://hub.docker.com/repository/docker/shyamagu/volavote">shyamagu/volavote on Dockerhub</a><br>or clone from <a href="https://github.com/shyamagu/volavote">https://github.com/shyamagu/volavote</a></div>
+    </div>
+  </body>
+</html>
