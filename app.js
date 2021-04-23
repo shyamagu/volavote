@@ -54,8 +54,27 @@ app.get('/survey', function(req, res, next) {
     global.box[title]["D4"]=d4
     global.box[title]["D5"]=d5
   }
-
   res.render('survey', { title: title, num:num, d1:d1, d2:d2, d3:d3, d4:d4, d5:d5});
+});
+
+app.get('/map', function(req, res, next) {
+  const title = req.query.title
+  let image = req.query.image
+  let width = req.query.width
+  if(isNaN(width)) width=500
+  if(image==="japan"){
+    image = "/images/japan.gif"
+  }else if(image === "world"){
+    image = "/images/world_img.png"
+  }else if(image === "kanto"){
+    image = "/images/kanto.gif"
+  }
+  if(!global.box[title]){
+    global.box[title] = {}
+  }
+  global.box[title]["IMG"]=image
+  global.box[title]["IMG_w"]=width
+  res.render('map', { title: title, image: image, width: width});
 });
 
 global.box = {}
@@ -78,12 +97,18 @@ app.get('/box',function(req,res,next){
     returnBox["D3"] =global.box[title]["D3"]
     returnBox["D4"] =global.box[title]["D4"]
     returnBox["D5"] =global.box[title]["D5"]
+    returnBox["IMG"] =global.box[title]["IMG"]
+    returnBox["IMG_w"] =global.box[title]["IMG_w"]
+    returnBox["MAP"]=[]
 
-    let oneList = Object.values(global.box[title])
-    oneList.forEach(key=>{
-      if(["YES","NO","S1","S2","S3","S4","S5"].indexOf(key)===-1)return
-      returnBox[key] = (returnBox[key])? returnBox[key]+1 : 1;
-    })
+    for(let key in global.box[title]){
+      let value = global.box[title][key]
+      if(["YES","NO","S1","S2","S3","S4","S5"].indexOf(value)>=0){
+        returnBox[value] = (returnBox[value])? returnBox[value]+1 : 1;
+      }else if(["IMG","IMG_w","D1","D2","D3","D4","D5"].indexOf(key)===-1){
+        returnBox["MAP"].push(value)
+      }
+    }
     returnBoxes.push(returnBox)
   })
 
@@ -115,6 +140,8 @@ app.post('/vote',function(req,res,next){
       }else if(vote.vote==="S5"){
         judge = "S5"
       }
+    }else if(vote.type === "MAP"){
+      judge = vote.vote
     }
     global.box[vote.title][req.session.id] = judge
 
@@ -126,11 +153,18 @@ app.post('/vote',function(req,res,next){
     returnBox["S2"] =0
     returnBox["S3"] =0
     returnBox["S4"] =0
-    returnBox["S5"] =0    
-    const voteList = Object.values(global.box[vote.title])
-    voteList.forEach(key=>{
-      returnBox[key] = (returnBox[key])? returnBox[key]+1 : 1;
-    })
+    returnBox["S5"] =0
+    returnBox["MAP"]=[]
+
+    for(let key in global.box[vote.title]){
+      let value = global.box[vote.title][key]
+      if(["YES","NO","S1","S2","S3","S4","S5"].indexOf(value)>=0){
+        returnBox[value] = (returnBox[value])? returnBox[value]+1 : 1;
+      }else if(["IMG","IMG_w","D1","D2","D3","D4","D5"].indexOf(key)===-1){
+        returnBox["MAP"].push(value)
+      }
+    }
+
     io.emit('voting',returnBox)
   }
   res.json("OK")
@@ -181,11 +215,18 @@ io.on('connection',function(socket){
     returnBox["S2"] =0
     returnBox["S3"] =0
     returnBox["S4"] =0
-    returnBox["S5"] =0  
-    const voteList = Object.values(global.box[title])
-    voteList.forEach(key=>{
-      returnBox[key] = (returnBox[key])? returnBox[key]+1 : 1;
-    })
+    returnBox["S5"] =0
+    returnBox["MAP"]=[]
+
+    for(let key in global.box[title]){
+      let value = global.box[title][key]
+      if(["YES","NO","S1","S2","S3","S4","S5"].indexOf(value)>=0){
+        returnBox[value] = (returnBox[value])? returnBox[value]+1 : 1;
+      }else if(["IMG","IMG_w","D1","D2","D3","D4","D5"].indexOf(key)===-1){
+        returnBox["MAP"].push(value)
+      }
+    }
+
     io.emit('voting',returnBox)
   })
 })

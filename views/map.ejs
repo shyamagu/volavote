@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title><%= title %></title>
+    <script src="https://cdn.jsdelivr.net/npm/vue@2/dist/vue.js"></script>
+    <script src="/socket.io/socket.io.js"></script>
+    <link rel='stylesheet' href='/stylesheets/style.css' />
+  </head>
+  <body>
+    <div id="app">
+      <div class="vote_area">
+        <div class="vote_title"><%= title %></div>
+        <div class="map_area" :style="`width:<%= width %>px`">
+          <img @click="onClickMap" src=<%= image %> width=<%= width %> border=5/>
+          <div v-for="position in positions":style="`position:absolute;top:${position[1]}px;left:${position[0]}px;pointer-events:none;`" >
+            <img src="/images/point.png"/>
+          </div>
+        </div>
+        <!--
+        <button class="yes_button" :class="{votedYesStyle: votedYes}" :style="`width:${sizeYes}px;height:${sizeYes}px`" @click.prevent="sayYes">Yes<br/>{{countYes}}</button>
+        <button class="no_button" :class="{votedNoStyle: votedNo}" :style="`width:${sizeNo}px;height:${sizeNo}px`" @click.prevent="sayNo">No</br>{{countNo}}</button>
+        -->
+      </div>
+    </div>
+  </body>
+  <script>
+    const socket = io();
+    var app = new Vue({
+      el: '#app',
+      data: {
+        title: '<%= title %>',
+        errorMessage: '',
+        mapClicked:false,
+        offsetX:0,
+        offsetY:0,
+        positions:[],
+      },
+      mounted() {
+        socket.emit('voting',this.title)
+        socket.on('voting',(box)=>{
+          if(this.title === box.title){
+            this.positions = box.MAP
+          }
+        })
+      },
+      methods:{
+        onClickMap: function(e){
+          this.mapClicked = true
+          this.offsetX = e.offsetX
+          this.offsetY = e.offsetY
+          const position = [e.offsetX,e.offsetY]
+          this.vote({title:this.title, vote:position, type:"MAP"})
+        },
+        vote:function(vote){
+          fetch("/vote",{
+            method:'POST',
+            headers:{'Content-Type':'application/json'},
+            body:JSON.stringify(vote)
+          })
+          .then(response=>{
+            //OK
+          })
+          .catch((error)=>{
+            this.errorMessage = error
+          });
+        },
+      }
+    })
+  </script>
+</html>

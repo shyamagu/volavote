@@ -12,7 +12,7 @@ body {
 }
 
 .explain_sub_title{
-  font-size: 24px;
+  font-size: 20px;
   margin-bottom: 20px;
 }
 
@@ -25,7 +25,7 @@ body {
   display: inline-block;
   width:400px;
   height:500px;
-  font-size: 20px;
+  font-size: 16px;
   border: solid 1px #999;
 }
 
@@ -124,4 +124,10 @@ body {
 
 .survey_button_on{
   background: blue;
+}
+
+.map_area{
+  margin:auto;
+  margin-top:50px;
+  position: relative;
 }

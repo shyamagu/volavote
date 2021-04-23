@@ -9,7 +9,7 @@
       <div class="explain_title"><%= title %></div>
       <div class="explain_sub_title">Simple voting web application on memory</div>
       <div class="explain_sub_title">
-        2 type of survey you can make and share the url to your audience like below.
+        3 type of survey you can make and share the url to your audience like below.
         <br>
         *please note that all data will be lost when server down.(no storage)
       </div>
@@ -45,6 +45,26 @@
             </tr>
             <tr>
               <td>d5</td><td>display name of 5th</td><td></td>
+            </tr>
+          </table>
+        </div>
+      </div>
+      <div class="explain_block">
+        <a href="<%=url %>map?title=where%20r%20u?&image=japan&width=300"><%=url %>map?title=where%20r%20u?&image=japan&width=300</a>
+        <img src="/images/map_sample.png" width=300>
+        <div class="explain_table">
+          <table border="1" style="border-collapse: collapse">
+            <tr>
+              <td>parameter</td><td>value</td><td>required</td>
+            </tr>
+            <tr>
+              <td>title</td><td>survey title</td><td>*</td>
+            </tr>
+            <tr>
+              <td>image</td><td>image url or "japan","world"</td><td>*</td>
+            </tr>
+            <tr>
+              <td>width</td><td>width of the image(default=500)</td><td></td>
             </tr>
           </table>
         </div>
