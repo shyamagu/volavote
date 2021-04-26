@@ -34,11 +34,14 @@ app.get('/alt', function(req, res, next) {
   if(!global.box[title]){
     global.box[title] = {}
   }
+  global.box[title]["TYPE"]="ALT"
+  global.box[title]["RESULT"]={}
   res.render('vote', { title: title});
 });
 
 app.get('/survey', function(req, res, next) {
   const title = req.query.title
+  const type  = req.query.type
   let num = req.query.num
   if(!num) num = 5
   const d1 = req.query.d1
@@ -48,12 +51,16 @@ app.get('/survey', function(req, res, next) {
   const d5 = req.query.d5
   if(!global.box[title]){
     global.box[title] = {}
-    global.box[title]["D1"]=d1
-    global.box[title]["D2"]=d2
-    global.box[title]["D3"]=d3
-    global.box[title]["D4"]=d4
-    global.box[title]["D5"]=d5
   }
+  global.box[title]["D1"]=d1
+  global.box[title]["D2"]=d2
+  global.box[title]["D3"]=d3
+  global.box[title]["D4"]=d4
+  global.box[title]["D5"]=d5
+  global.box[title]["TYPE"]="SURVEY"
+  global.box[title]["STEP"]=num
+  global.box[title]["RESULT"]={}
+
   res.render('survey', { title: title, num:num, d1:d1, d2:d2, d3:d3, d4:d4, d5:d5});
 });
 
@@ -72,103 +79,49 @@ app.get('/map', function(req, res, next) {
   if(!global.box[title]){
     global.box[title] = {}
   }
+  global.box[title]["TYPE"]="MAP"
   global.box[title]["IMG"]=image
   global.box[title]["IMG_w"]=width
+  global.box[title]["RESULT"]={}
   res.render('map', { title: title, image: image, width: width});
 });
 
 global.box = {}
 
 app.get('/box',function(req,res,next){
-
   let returnBoxes = []
   Object.keys(global.box).forEach(title=>{
-    let returnBox = {}
-    returnBox["title"]=title
-    returnBox["YES"]=0
-    returnBox["NO"] =0
-    returnBox["S1"] =0
-    returnBox["S2"] =0
-    returnBox["S3"] =0
-    returnBox["S4"] =0
-    returnBox["S5"] =0 
-    returnBox["D1"] =global.box[title]["D1"]
-    returnBox["D2"] =global.box[title]["D2"]
-    returnBox["D3"] =global.box[title]["D3"]
-    returnBox["D4"] =global.box[title]["D4"]
-    returnBox["D5"] =global.box[title]["D5"]
-    returnBox["IMG"] =global.box[title]["IMG"]
-    returnBox["IMG_w"] =global.box[title]["IMG_w"]
-    returnBox["MAP"]=[]
-
-    for(let key in global.box[title]){
-      let value = global.box[title][key]
-      if(["YES","NO","S1","S2","S3","S4","S5"].indexOf(value)>=0){
-        returnBox[value] = (returnBox[value])? returnBox[value]+1 : 1;
-      }else if(["IMG","IMG_w","D1","D2","D3","D4","D5"].indexOf(key)===-1){
-        returnBox["MAP"].push(value)
-      }
-    }
+    let returnBox = makeReturnBox(title)
     returnBoxes.push(returnBox)
   })
-
   res.render('box',{box:JSON.stringify(returnBoxes,null,4)})
 })
 
+app.get('/raw',function(req,res,next){
+  res.render('box',{box:JSON.stringify(global.box,null,4)})
+})
+
 app.post('/vote',function(req,res,next){
-  vote = req.body
-  if(vote.title){
-    if(!global.box[vote.title]){
-      global.box[vote.title] = {}
-    }
-    var judge = ""
-    if(vote.type === "ALT"){
-      if(vote.vote === "YES"){
-        judge = "YES"
-      }else{
-        judge = "NO"
-      }
-    }else if(vote.type === "SURVEY"){
-      if(vote.vote ==="S1"){
-        judge = "S1"
-      }else if(vote.vote==="S2"){
-        judge = "S2"
-      }else if(vote.vote==="S3"){
-        judge = "S3"
-      }else if(vote.vote==="S4"){
-        judge = "S4"
-      }else if(vote.vote==="S5"){
-        judge = "S5"
-      }
-    }else if(vote.type === "MAP"){
-      judge = vote.vote
-    }
-    global.box[vote.title][req.session.id] = judge
+  const vote = req.body
 
-    let returnBox = {}
-    returnBox["title"]=vote.title
-    returnBox["YES"]=0
-    returnBox["NO"] =0
-    returnBox["S1"] =0
-    returnBox["S2"] =0
-    returnBox["S3"] =0
-    returnBox["S4"] =0
-    returnBox["S5"] =0
-    returnBox["MAP"]=[]
-
-    for(let key in global.box[vote.title]){
-      let value = global.box[vote.title][key]
-      if(["YES","NO","S1","S2","S3","S4","S5"].indexOf(value)>=0){
-        returnBox[value] = (returnBox[value])? returnBox[value]+1 : 1;
-      }else if(["IMG","IMG_w","D1","D2","D3","D4","D5"].indexOf(key)===-1){
-        returnBox["MAP"].push(value)
-      }
-    }
-
-    io.emit('voting',returnBox)
+  if(!validateVote(vote)){
+    res.json("NG")
+    return
   }
+
+  const judge = vote.vote 
+  global.box[vote.title]["RESULT"][req.session.id] = judge
+
+  let returnBox = makeReturnBox(vote.title)
+  io.emit('voting',returnBox)
+
   res.json("OK")
 })
+
+function validateVote(vote){
+  //vote validation area if you need
+  return true
+}
 
 // catch 404 and forward to error handler
 app.use(function(req, res, next) {
@@ -204,32 +157,59 @@ server = http.createServer(app);
  */
 var io = require('socket.io')(server)
 io.on('connection',function(socket){
-  let returnbox = {}
   socket.on('voting',function(title){
     if(!global.box[title]) return
-    let returnBox = {}
-    returnBox["title"]=title
+    let returnBox = makeReturnBox(title)
+
+    io.emit('voting',returnBox)
+  })
+})
+
+function makeReturnBox(title){
+  const type = global.box[title]["TYPE"]
+
+  let returnBox = {}
+  returnBox["title"]=title
+  returnBox["TYPE"]=type
+
+  if(type === "ALT"){
     returnBox["YES"]=0
     returnBox["NO"] =0
+
+    let result = global.box[title]["RESULT"]
+    for(key in result){
+      returnBox[result[key]] = (returnBox[result[key]])? returnBox[result[key]]+1 : 1;
+    }
+  }else if(type === "SURVEY"){
+    returnBox["STEP"]=global.box[title]["STEP"]
     returnBox["S1"] =0
     returnBox["S2"] =0
     returnBox["S3"] =0
     returnBox["S4"] =0
     returnBox["S5"] =0
+    returnBox["D1"] =global.box[title]["D1"]
+    returnBox["D2"] =global.box[title]["D2"]
+    returnBox["D3"] =global.box[title]["D3"]
+    returnBox["D4"] =global.box[title]["D4"]
+    returnBox["D5"] =global.box[title]["D5"]
+
+    let result = global.box[title]["RESULT"]
+    for(key in result){
+      returnBox[result[key]] = (returnBox[result[key]])? returnBox[result[key]]+1 : 1;
+    }
+  }else if(type === "MAP"){
+    returnBox["IMG"] =global.box[title]["IMG"]
+    returnBox["IMG_w"] =global.box[title]["IMG_w"]
     returnBox["MAP"]=[]
 
-    for(let key in global.box[title]){
-      let value = global.box[title][key]
-      if(["YES","NO","S1","S2","S3","S4","S5"].indexOf(value)>=0){
-        returnBox[value] = (returnBox[value])? returnBox[value]+1 : 1;
-      }else if(["IMG","IMG_w","D1","D2","D3","D4","D5"].indexOf(key)===-1){
-        returnBox["MAP"].push(value)
-      }
+    let result = global.box[title]["RESULT"]
+    for(key in result){
+      returnBox["MAP"].push(result[key])
     }
+  }
 
-    io.emit('voting',returnBox)
-  })
-})
+  return returnBox
+}
 
 /**
  * Listen on provided port, on all network interfaces.
