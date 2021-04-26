@@ -29,13 +29,11 @@ app.get('/', function(req, res, next) {
   res.render('index', { title: "volavote", url:fullurl});
 });
 
+const voteBox = require("./modules/votebox")
+
 app.get('/alt', function(req, res, next) {
   const title = req.query.title
-  if(!global.box[title]){
-    global.box[title] = {}
-  }
-  global.box[title]["TYPE"]="ALT"
-  global.box[title]["RESULT"]={}
+  voteBox.setMetadata(title,"ALT")
   res.render('vote', { title: title});
 });
 
@@ -49,18 +47,7 @@ app.get('/survey', function(req, res, next) {
   const d3 = req.query.d3
   const d4 = req.query.d4
   const d5 = req.query.d5
-  if(!global.box[title]){
-    global.box[title] = {}
-  }
-  global.box[title]["D1"]=d1
-  global.box[title]["D2"]=d2
-  global.box[title]["D3"]=d3
-  global.box[title]["D4"]=d4
-  global.box[title]["D5"]=d5
-  global.box[title]["TYPE"]="SURVEY"
-  global.box[title]["STEP"]=num
-  global.box[title]["RESULT"]={}
-
+  voteBox.setMetadata(title,"SURVEY",{"STEP":num,"D1":d1,"D2":d2,"D3":d3,"D4":d4,"D5":d5})
   res.render('survey', { title: title, num:num, d1:d1, d2:d2, d3:d3, d4:d4, d5:d5});
 });
 
@@ -76,52 +63,32 @@ app.get('/map', function(req, res, next) {
   }else if(image === "kanto"){
     image = "/images/kanto.gif"
   }
-  if(!global.box[title]){
-    global.box[title] = {}
-  }
-  global.box[title]["TYPE"]="MAP"
-  global.box[title]["IMG"]=image
-  global.box[title]["IMG_w"]=width
-  global.box[title]["RESULT"]={}
+  voteBox.setMetadata(title,"MAP",{"IMG":image,"IMG_w":width})
   res.render('map', { title: title, image: image, width: width});
 });
 
-global.box = {}
-
 app.get('/box',function(req,res,next){
-  let returnBoxes = []
-  Object.keys(global.box).forEach(title=>{
-    let returnBox = makeReturnBox(title)
-    returnBoxes.push(returnBox)
-  })
-  res.render('box',{box:JSON.stringify(returnBoxes,null,4)})
+  res.render('box',{box:JSON.stringify(voteBox.getAll(),null,4)})
 })
 
-app.get('/raw',function(req,res,next){
-  res.render('box',{box:JSON.stringify(global.box,null,4)})
+app.get('/result',function(req,res,next){
+  res.render('box',{box:JSON.stringify(voteBox.countUpAll(),null,4)})
 })
 
 app.post('/vote',function(req,res,next){
   const vote = req.body
 
-  if(!validateVote(vote)){
+  if(!voteBox.validateVote(vote)){
     res.json("NG")
     return
   }
 
   const judge = vote.vote 
-  global.box[vote.title]["RESULT"][req.session.id] = judge
-
-  let returnBox = makeReturnBox(vote.title)
-  io.emit('voting',returnBox)
+  voteBox.vote(vote.title,req.session.id,judge)
+  io.emit('voting',voteBox.countUp(vote.title))
 
   res.json("OK")
 })
-
-function validateVote(vote){
-  //vote validation area if you need
-  return true
-}
 
 // catch 404 and forward to error handler
 app.use(function(req, res, next) {
@@ -130,6 +97,7 @@ app.use(function(req, res, next) {
 
 // error handler
 app.use(function(err, req, res, next) {
+  console.log(err)
   // set locals, only providing error in development
   res.locals.message = err.message;
   res.locals.error = req.app.get('env') === 'development' ? err : {};
@@ -158,58 +126,10 @@ server = http.createServer(app);
 var io = require('socket.io')(server)
 io.on('connection',function(socket){
   socket.on('voting',function(title){
-    if(!global.box[title]) return
-    let returnBox = makeReturnBox(title)
-
+    let returnBox = voteBox.countUp(title)
     io.emit('voting',returnBox)
   })
 })
-
-function makeReturnBox(title){
-  const type = global.box[title]["TYPE"]
-
-  let returnBox = {}
-  returnBox["title"]=title
-  returnBox["TYPE"]=type
-
-  if(type === "ALT"){
-    returnBox["YES"]=0
-    returnBox["NO"] =0
-
-    let result = global.box[title]["RESULT"]
-    for(key in result){
-      returnBox[result[key]] = (returnBox[result[key]])? returnBox[result[key]]+1 : 1;
-    }
-  }else if(type === "SURVEY"){
-    returnBox["STEP"]=global.box[title]["STEP"]
-    returnBox["S1"] =0
-    returnBox["S2"] =0
-    returnBox["S3"] =0
-    returnBox["S4"] =0
-    returnBox["S5"] =0
-    returnBox["D1"] =global.box[title]["D1"]
-    returnBox["D2"] =global.box[title]["D2"]
-    returnBox["D3"] =global.box[title]["D3"]
-    returnBox["D4"] =global.box[title]["D4"]
-    returnBox["D5"] =global.box[title]["D5"]
-
-    let result = global.box[title]["RESULT"]
-    for(key in result){
-      returnBox[result[key]] = (returnBox[result[key]])? returnBox[result[key]]+1 : 1;
-    }
-  }else if(type === "MAP"){
-    returnBox["IMG"] =global.box[title]["IMG"]
-    returnBox["IMG_w"] =global.box[title]["IMG_w"]
-    returnBox["MAP"]=[]
-
-    let result = global.box[title]["RESULT"]
-    for(key in result){
-      returnBox["MAP"].push(result[key])
-    }
-  }
-
-  return returnBox
-}
 
 /**
  * Listen on provided port, on all network interfaces.
