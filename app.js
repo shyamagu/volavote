@@ -6,6 +6,7 @@ var session = require('express-session')
 var logger = require('morgan');
 var debug = require('debug')('volavote:server');
 var http = require('http');
+require('dotenv').config()
 
 var app = express();
 app.use(session({
@@ -24,71 +25,21 @@ app.use(express.urlencoded({ extended: false }));
 app.use(cookieParser());
 app.use(express.static(path.join(__dirname, 'public')));
 
-app.get('/', function(req, res, next) {
-  const fullurl = req.protocol + '://' + req.get('host') + req.originalUrl;
-  res.render('index', { title: "volavote", url:fullurl});
-});
+/**
+ * Create HTTP server.
+ */
 
-const voteBox = require("./modules/votebox")
+server = http.createServer(app);
 
-app.get('/alt', function(req, res, next) {
-  const title = req.query.title
-  voteBox.setMetadata(title,"ALT")
-  res.render('vote', { title: title});
-});
+/**
+ * Socket.IO server & Router
+ */
+var io = require('socket.io')(server)
+var socketio = require('./modules/votesocketio')
+socketio(io)
 
-app.get('/survey', function(req, res, next) {
-  const title = req.query.title
-  const type  = req.query.type
-  let num = req.query.num
-  if(!num) num = 5
-  const d1 = req.query.d1
-  const d2 = req.query.d2
-  const d3 = req.query.d3
-  const d4 = req.query.d4
-  const d5 = req.query.d5
-  voteBox.setMetadata(title,"SURVEY",{"STEP":num,"D1":d1,"D2":d2,"D3":d3,"D4":d4,"D5":d5})
-  res.render('survey', { title: title, num:num, d1:d1, d2:d2, d3:d3, d4:d4, d5:d5});
-});
-
-app.get('/map', function(req, res, next) {
-  const title = req.query.title
-  let image = req.query.image
-  let width = req.query.width
-  if(isNaN(width)) width=500
-  if(image==="japan"){
-    image = "/images/japan.gif"
-  }else if(image === "world"){
-    image = "/images/world_img.png"
-  }else if(image === "kanto"){
-    image = "/images/kanto.gif"
-  }
-  voteBox.setMetadata(title,"MAP",{"IMG":image,"IMG_w":width})
-  res.render('map', { title: title, image: image, width: width});
-});
-
-app.get('/box',function(req,res,next){
-  res.render('box',{box:JSON.stringify(voteBox.getAll(),null,4)})
-})
-
-app.get('/result',function(req,res,next){
-  res.render('box',{box:JSON.stringify(voteBox.countUpAll(),null,4)})
-})
-
-app.post('/vote',function(req,res,next){
-  const vote = req.body
-
-  if(!voteBox.validateVote(vote)){
-    res.json("NG")
-    return
-  }
-
-  const judge = vote.vote 
-  voteBox.vote(vote.title,req.session.id,judge)
-  io.emit('voting',voteBox.countUp(vote.title))
-
-  res.json("OK")
-})
+var voteRouter = require('./modules/voteRouter')(io)
+app.use('/',voteRouter)
 
 // catch 404 and forward to error handler
 app.use(function(req, res, next) {
@@ -111,25 +62,8 @@ app.use(function(err, req, res, next) {
  * Get port from environment and store in Express.
  */
 
-var port = normalizePort(process.env.PORT || '3000');
+var port = normalizePort(process.env.PORT || '80');
 app.set('port', port);
-
-/**
- * Create HTTP server.
- */
-
-server = http.createServer(app);
-
-/**
- * Socket.IO server
- */
-var io = require('socket.io')(server)
-io.on('connection',function(socket){
-  socket.on('voting',function(title){
-    let returnBox = voteBox.countUp(title)
-    io.emit('voting',returnBox)
-  })
-})
 
 /**
  * Listen on provided port, on all network interfaces.
