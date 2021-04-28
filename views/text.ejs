@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title><%= title %></title>
+    <script src="https://cdn.jsdelivr.net/npm/vue@2/dist/vue.js"></script>
+    <script src="/socket.io/socket.io.js"></script>
+    <link rel='stylesheet' href='/stylesheets/style.css' />
+  </head>
+  <body>
+    <div id="app">
+      <div class="vote_area">
+        <div class="vote_title"><%= title %></div>
+        <div class="message_area">
+          <div class="message_text"><textarea class="message_text_area" rows="3" v-model="message"></textarea></div>
+          <div class="message_post"><button class="message_post_button" @click="postMessage">{{yourMessage? label_repost:label_post}}</button></div>
+        </div>
+      </div>
+      <div class="list_display_area">
+      <div class="list_area" v-for="msg in messages">
+        <button v-if="yourMessage!=msg.key" class="agree_button" @click="agreeMessage(msg.key)">{{label_agree}}</button>
+        <button disabled v-if="yourMessage==msg.key" class="agree_button">{{label_agree}}</button>
+        <div class="agree_number_area" :class="{same_message_area: yourMessage==msg.key}">{{msg.value}}</div>
+        <div class="list_message_area" :class="{same_message_area: yourMessage==msg.key}">{{msg.key}}</div>
+      </div>
+      </div>
+    </div>
+  </body>
+  <script>
+    const socket = io();
+    var app = new Vue({
+      el: '#app',
+      data: {
+        title: '<%= title %>',
+        errorMessage: '',
+        message: '',
+        yourMessage: '',
+        messages: [],
+        label_post:'<%= post %>',
+        label_repost:'<%= repost %>',
+        label_agree:'<%= agree %>',
+      },
+      mounted() {
+        socket.emit('voting',this.title)
+        socket.on('voting',(box)=>{
+          if(this.title === box.title){
+            let arr = Object.keys(box.MESSAGES).map((e)=>{return {key:e,value:box.MESSAGES[e]}})
+            arr.sort(function(a,b){
+              if(a.value < b.value) return 1;
+              if(a.value > b.value) return -1;
+              return 0;
+            })
+            this.messages = arr
+          }
+        })
+        socket.on('switch',(url)=>{
+          window.location.href=url
+        })
+      },
+      methods:{
+        postMessage:function(){
+          fetch("/vote",{
+            method:'POST',
+            headers:{'Content-Type':'application/json'},
+            body:JSON.stringify({title:this.title, vote:this.message, type:"TEXT"})
+          })
+          .then(response=>{
+            //OK
+            this.yourMessage = this.message
+          })
+          .catch((error)=>{
+            this.errorMessage = error
+          });
+        },
+        agreeMessage:function(msg){
+          this.message = msg
+          this.postMessage()
+        }
+      }
+    })
+  </script>
+</html>

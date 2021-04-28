@@ -23,16 +23,263 @@ body {
 .explain_block{
   vertical-align:top;
   display: inline-block;
-  width:400px;
-  height:500px;
+  width:200px;
+  height:300px;
   font-size: 16px;
   border: solid 1px #999;
 }
 
-.explain_table{
+.explain_survey{
+  font-size:24px;
+  font-weight: bold;
+  margin: 10px auto 10px auto;
+}
+
+.input_key{
   font-size:16px;
+  margin:16px;
+}
+
+.error_message{
+  font-size: 20px;
+  font-weight: bold;
+  color:red;
+  margin-bottom: 20px;
+}
+
+.options{
+  margin-bottom:5px;
+}
+
+.result_area{
+  font-size:24px;
   text-align: left;
-  margin-left: 40px;
+  width:900px;
+  margin:auto;
+}
+
+.result_line_switch{
+  vertical-align:top;
+  font-size: 20px;
+  display: inline-block;
+  width:80px;
+  height:52px;
+  margin: 0px 0px 1px 0px;
+}
+
+.switch_button{
+  width:80px;
+  height:52px;
+}
+
+.result_line_copy{
+  vertical-align:top;
+  font-size: 20px;
+  display: inline-block;
+  width:50px;
+  height:52px;
+  margin: 0px 0px 1px 0px;
+}
+
+.copy_button{
+  width:50px;
+  height:52px;
+  background-color: #999;
+}
+
+.result_line_title{
+  vertical-align:top;
+  font-size: 20px;
+  display: inline-block;
+  width:300px;
+  height:52px;
+  background-color: #CCC;
+  margin: 0px 0px 1px 0px;
+}
+
+.result_line_type {
+  vertical-align:top;
+  font-size: 20px;
+  display: inline-block;
+  width:100px;
+  height:52px;
+  background-color: #EEE;
+  margin: 0px 0px 1px 0px;
+}
+
+.result_line_result{
+  vertical-align:top;
+  font-size: 20px;
+  display: inline-block;
+  width:300px;
+  height:52px;
+  background-color: #EEE;
+  margin: 0px 0px 1px 0px;
+}
+
+.message_area{
+  font-size:24px;
+  text-align: left;
+  width:550px;
+  height:72px;
+  line-height: 72px;
+  margin:20px auto auto auto;
+}
+
+.message_text{
+  vertical-align:top;
+  font-size: 24px;
+  display: inline-block;
+  width:400px;
+  margin: 0px 0px 2px 0px;
+}
+
+.message_text_area{
+  font-size: 24px;
+  width:400px;
+  height:72px;
+}
+
+.message_post{
+  vertical-align:top;
+  font-size: 24px;
+  display: inline-block;
+  width:100px;
+  margin: 0px 0px 2px 10px;
+}
+
+.message_post_button{
+  width:100px;
+  height:72px;
+  background-color: #9C9;
+}
+
+.message_post_button:disabled{
+  cursor: default;
+  color: #9C9;
+  opacity: 0.6;
+}
+
+.list_display_area{
+  margin-top:40px;
+}
+
+.list_area{
+  font-size:24px;
+  text-align: left;
+  width:700px;
+  height:64px;
+  line-height: 64px;
+  margin:10px auto auto auto;
+}
+
+.agree_button_area{
+  vertical-align:middle;
+  font-size: 24px;
+  display: inline-block;
+  width:70px;
+}
+
+.agree_button{
+  vertical-align:middle;
+  display: inline-block;
+  width:70px;
+  height:64px;
+  background-color: #9C9;
+}
+
+.agree_number_area{
+  text-align: center;
+  vertical-align:middle;
+  display: inline-block;
+  font-size: 24px;
+  height:64px;
+  width:70px;
+  border:solid 1px #9C9;
+}
+
+.list_message_area{
+  vertical-align:middle;
+  font-size: 16px;
+  height:60px;
+  display: inline-block;
+  width:500px;
+  white-space: pre-wrap;
+  overflow: auto;
+  line-height: 16px;
+  border:solid 1px #9C9;
+}
+
+.same_message_area{
+  background-color: #FF9;
+}
+
+.making_area{
+  font-size:24px;
+  text-align: center;
+  width:700px;
+  height:52px;
+  line-height: 52px;
+  margin:auto;
+}
+
+.create_area{
+  margin-top:20px;
+  background-color: #CCF;
+}
+.make_poll_item{
+  vertical-align:middle;
+  font-size: 24px;
+  display: inline-block;
+  width:200px;
+  margin: 0px 0px 2px 0px;
+  text-decoration: underline;
+  font-weight: bold;
+}
+
+.make_poll_item_step{
+  vertical-align:top;
+  font-size: 24px;
+  display: inline-block;
+  width:200px;
+  margin: 0px 0px 2px 0px;
+  text-decoration: underline;
+  font-weight: bold;
+}
+
+.make_poll_value{
+  vertical-align:middle;
+  font-size: 20px;
+  display: inline-block;
+  width:450px;
+  text-align: left;
+  margin: 0px 0px 2px 0px;
+}
+
+.make_poll_input{
+  font-size: 20px;
+  margin-left:5px;
+}
+
+.make_poll_botton_new{
+  background-color: #99F;
+  width:70px;
+  height:70px;
+  font-size:48px;
+  font-weight: bold;
+  border-radius:35px;
+  margin:5px;
+}
+.make_poll_botton_create{
+  background-color: #99F;
+  width:500px;
+  height:52px;
+  font-size:28px;
+  margin:5px;
+}
+
+.current_line{
+  background-color: #FCC;
 }
 
 .vote_area{

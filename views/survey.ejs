@@ -51,6 +51,9 @@
             this.bars=[maxh-Number(box.S1)*maxh/total,maxh-Number(box.S2)*maxh/total,maxh-Number(box.S3)*maxh/total,maxh-Number(box.S4)*maxh/total,maxh-Number(box.S5)*maxh/total]
           }
         })
+        socket.on('switch',(url)=>{
+          window.location.href=url
+        })
       },
       methods:{
         voteSurvey: function(index){

@@ -39,6 +39,9 @@
             this.sizeNo = 100+10*this.countNo
           }
         })
+        socket.on('switch',(url)=>{
+          window.location.href=url
+        })
       },
       methods:{
         sayYes: function(){

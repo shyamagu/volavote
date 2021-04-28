@@ -2,10 +2,23 @@ class VoteBox {
     static setMetadata(title,type,METADATA){
         if(!this.votebox[title]){
             this.votebox[title] = {}
+            this.votebox[title]["ID"] = this.id++
             this.votebox[title]["RESULT"] = {}
         }
         this.votebox[title]["TYPE"]=type
         this.votebox[title]["METADATA"] = METADATA
+    }
+
+    static setCurrent(id){
+        this.current = id
+    }
+
+    static checkPoll(title){
+        if(this.votebox[title]){
+            return {TYPE:this.votebox[title]["TYPE"],METADATA:this.votebox[title]["METADATA"]}
+        }else{
+            return null
+        }
     }
 
     static validateVote(vote){
@@ -20,6 +33,12 @@ class VoteBox {
         return this.votebox
     }
 
+    static replace(box){
+        this.votebox = box
+        this.id = 0
+        this.current = null
+    }
+
     static countUpAll(){
         let returnBoxes = []
         Object.keys(this.votebox).forEach(title=>{
@@ -32,10 +51,13 @@ class VoteBox {
     static countUp(title){
         if(!this.votebox[title]) return
         const type = this.votebox[title]["TYPE"]
+        const id = this.votebox[title]["ID"]
 
         let returnBox = {}
         returnBox["title"]=title
         returnBox["TYPE"]=type
+        returnBox["ID"] = id
+        returnBox["CURRENT"] = (id===this.current)
 
         if(type === "ALT"){
             returnBox["YES"]=0
@@ -43,7 +65,7 @@ class VoteBox {
 
             let result = this.votebox[title]["RESULT"]
             for(let key in result){
-            returnBox[result[key]] = (returnBox[result[key]])? returnBox[result[key]]+1 : 1;
+                returnBox[result[key]] = (returnBox[result[key]])? returnBox[result[key]]+1 : 1;
             }
         }else if(type === "SURVEY"){
             returnBox["STEP"]=this.votebox[title]["METADATA"]["STEP"]
@@ -60,7 +82,7 @@ class VoteBox {
 
             let result = this.votebox[title]["RESULT"]
             for(let key in result){
-            returnBox[result[key]] = (returnBox[result[key]])? returnBox[result[key]]+1 : 1;
+                returnBox[result[key]] = (returnBox[result[key]])? returnBox[result[key]]+1 : 1;
             }
         }else if(type === "MAP"){
             returnBox["IMG"] =this.votebox[title]["METADATA"]["IMG"]
@@ -71,6 +93,12 @@ class VoteBox {
             for(let key in result){
             returnBox["MAP"].push(result[key])
             }
+        }else if(type === "TEXT"){
+            let result = this.votebox[title]["RESULT"]
+            returnBox["MESSAGES"]={}
+            for(let key in result){
+                returnBox["MESSAGES"][result[key]] = (returnBox["MESSAGES"][result[key]])? returnBox["MESSAGES"][result[key]]+1 : 1;
+            }
         }
 
         return returnBox
@@ -78,5 +106,7 @@ class VoteBox {
 }
 
 VoteBox.votebox = {}
+VoteBox.id = 0
+VoteBox.current = null
 
 module.exports = VoteBox

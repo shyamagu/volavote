@@ -1,0 +1,358 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>volavote controll page</title>
+    <script src="https://cdn.jsdelivr.net/npm/vue@2/dist/vue.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/vue-clipboard2@0.3.1/dist/vue-clipboard.min.js"></script>
+    <script src="/socket.io/socket.io.js"></script>
+    <link rel='stylesheet' href='/stylesheets/style.css' />
+  </head>
+  <body>
+    <div id="app">
+      <div class="vote_area">
+        <div class="vote_title">volavote controll page</div>
+        <div class="input_key" v-if="!getControlled">KEY: <input id="volavotekey" v-model="authkey" type="password" autocomplete="none"><button @click="getControll">GET CONTROLL</button></div>
+        <div class="input_key" v-if="getControlled">
+          <div class="options">
+            Anonymous create poll: 
+            <input type="radio" id="enable"  v-model="anonymous" value="true" @click="checkAnonymous('true')"><label for="enable">Enable</label>
+            <input type="radio" id="disable" v-model="anonymous" value="false" @click="checkAnonymous('false')"><label for="disable">Disable</label>
+          </div>
+          <div class="options">
+            <button @click="showResult('all')">Show All(json)</button>
+            <button @click="downloadResult('all')">Download All(json)</button>
+            <input type="file" ref="file" style="display:none" accept="json" v-on:change="uploadAll()" aria-label="import all"/>
+            <button @click="$refs.file.click()">Import All(json)</button>
+          </div>
+          <div class="options">
+            <button @click="showResult('countup')">Show Countup(json)</button>
+            <button @click="downloadResult('countup')">Download Countup(json)</button>
+          </div>
+        </div>
+        <div v-if="errorMessage" class="error_message">{{errorMessage}}</div>
+      </div>
+      <div class="result_area">
+        <div v-for="(box,index) in resultBoxes" :key="box.ID">
+          <div class="result_line_switch":class="{current_line: box.CURRENT==true}"><button class="switch_button" :class="{current_line: box.CURRENT==true}" @click="switchTo(box.ID,getUrl(box))">{{box.CURRENT? "CURRENT":"SWITCH"}}</button></div>
+          <div class="result_line_title" :class="{current_line: box.CURRENT==true}"><a :href="getUrl(box)" target="_blank" rel="noopener noreferrer">{{box.title}}</a></div>
+          <div class="result_line_copy"><button class="copy_button" v-clipboard:copy="getFullUrl(box)">Copy URL</button></div>
+          <div class="result_line_type"  :class="{current_line: box.CURRENT==true}">{{box.TYPE}}</div>
+          <div v-if="box.TYPE=='ALT'" class="result_line_result" :class="{current_line: box.CURRENT==true}">YES:{{box.YES}},NO:{{box.NO}}</div>
+          <div v-if="box.TYPE=='SURVEY'" class="result_line_result" :class="{current_line: box.CURRENT==true}">S1:{{box.S1}},S2:{{box.S2}},S3:{{box.S3}},S4:{{box.S4}},S5:{{box.S5}}</div>
+          <div v-if="box.TYPE=='MAP'" class="result_line_result" :class="{current_line: box.CURRENT==true}">{{box.MAP.length}} points in MAP</div>
+          <div v-if="box.TYPE=='TEXT'" class="result_line_result" :class="{current_line: box.CURRENT==true}">messages</div>
+        </div>
+      </div>
+      <div v-if="getControlled" class="making_area">
+        <button v-if="!creatingPoll" class="make_poll_botton_new" @click="startToCreateNewPoll">+</button>
+        <div v-if="creatingPoll" class="create_area">
+          <div class="make_poll_item">Poll Title</div>
+          <div class="make_poll_value">
+            <input class="make_poll_input" size=35 v-model="new_title" type="text">
+          </div>
+          <div class="make_poll_item">Type</div>
+          <div class="make_poll_value">
+            <select class="make_poll_input" v-model="new_type">
+              <option v-for="option in new_type_options" v-bind:value="option.value">
+                {{option.text}}
+              </option>
+            </select>
+          </div>
+          <div v-if="new_type=='SURVEY'">
+            <div class="make_poll_item">Steps</div>
+            <div class="make_poll_value">
+              <select class="make_poll_input" v-model="new_step_num">
+                <option v-for="option in new_step_options" v-bind:value="option.value">
+                  {{option.text}}
+                </option>
+              </select>
+            </div>
+            <div class="make_poll_item_step">Step Messages</div>
+            <div class="make_poll_value" >
+              <div class="make_poll_input" v-for="num in new_step_num">
+                step {{num}}:<input class="make_poll_input" size=25 v-model=new_step_messages[num-1] type="text">
+              </div>
+            </div>
+          </div>
+          <div v-if="new_type=='MAP'">
+            <div class="make_poll_item">Image</div>
+            <div class="make_poll_value">
+              <select class="make_poll_input" v-model="new_map_image">
+                <option v-for="option in new_map_image_options" v-bind:value="option.value">
+                  {{option.text}}
+                </option>
+              </select>
+              or
+              <input class="make_poll_input" v-model="new_map_image_url" placeholder="image url">
+            </div>
+            <div class="make_poll_item">Image width</div>
+            <div class="make_poll_value">
+              <input class="make_poll_input" type="number" max="1600" min="100" v-model="new_map_image_width">px (100px~500px*~1600px)
+            </div>
+          </div>
+          <button class="make_poll_botton_create" @click="createPoll">Create Poll</button>
+        </div>
+      </div>
+    </div>
+  </body>
+  <script>
+    const socket = io();
+    const VueClipboard  = window['VueClipboard'];
+    Vue.use(VueClipboard)
+    var app = new Vue({
+      el: '#app',
+      data: {
+        authkey:"",
+        anonymous:false,
+        resultBoxes:[],
+        errorMessage:"",
+        new_title:"",
+        new_type:"ALT",
+        new_type_options:[
+          {text: 'YES/NO',value:'ALT'},
+          {text: '2~5 Step Survey',value:'SURVEY'},
+          {text: 'MAP',value:'MAP'},
+          {text: 'TEXT',value:'TEXT'},
+        ],
+        new_step_num:5,
+        new_step_options:[
+          {text: '2',value:2},
+          {text: '3',value:3},
+          {text: '4',value:4},
+          {text: '5',value:5},
+        ],
+        new_step_messages:[],
+        new_map_image:"",
+        new_map_image_options:[
+          {text: 'World Map', value:"world"},
+          {text: 'Japan Map', value:"japan"}
+        ],
+        new_map_image_url:"",
+        new_map_image_width:500,
+        getControlled:false,
+        creatingPoll:false,
+      },
+      mounted() {
+        socket.on('voting',(box)=>{
+          this.getControll()
+        })
+      },
+      methods:{
+        checkAnonymous:function(flag){
+          if(flag == this.anonymous) return
+          this.errorMessage = ""
+          fetch("/controll/anonymous",{
+            method:'POST',
+            headers:{'Content-Type':'application/json'},
+            body:JSON.stringify({authkey:this.authkey,anonymous:(flag==="true")})
+          })
+          .then(response=>response.json())
+          .then(data=>{
+            if(data.auth==="OK"){
+            }else{
+              this.errorMessage = "Invalid key"
+              this.getControlled= false
+            }
+          })
+          .catch(error=>{
+            this.errorMessage = error
+          })
+        },
+        startToCreateNewPoll:function(){
+          this.creatingPoll = true
+        },
+        createPoll:function(){
+          this.errorMessage = ""
+          fetch("/controll/create",{
+            method:'POST',
+            headers:{'Content-Type':'application/json'},
+            body:JSON.stringify({
+              authkey:this.authkey,
+              title:this.new_title,
+              type:this.new_type,
+              num:this.new_step_num,
+              ds:this.new_step_messages,
+              image:this.new_map_image? this.new_map_image:this.new_map_image_url,
+              width:this.new_map_image_width
+              })
+          })
+          .then(response => response.json())
+          .then(data=>{
+            if(data.auth === "OK"){
+              this.resultBoxes = data.result
+              if(this.resultBoxes.length>0){
+                this.resultBoxes.sort((a,b)=>a.ID-b.ID)
+              }else{
+                this.errorMessage="There is No poll"
+              }
+              this.postCreate();
+            }else{
+              this.errorMessage = "Invalid key"
+              this.getControlled = false;
+            }
+//            socket.emit('voting',this.title)
+          })
+          .catch(error=>{
+            this.errorMessage = error
+          })
+        },
+        getControll: function(){
+          this.errorMessage = ""
+          fetch("/controll/get",{
+            method:'POST',
+            headers:{'Content-Type':'application/json'},
+            body:JSON.stringify({authkey:this.authkey})
+          })
+          .then(response => response.json())
+          .then(data=>{
+            if(data.auth === "OK"){
+              this.resultBoxes = data.result
+              this.anonymous = data.anonymous
+              if(this.resultBoxes.length>0){
+                this.resultBoxes.sort((a,b)=>a.ID-b.ID)
+              }else{
+                this.errorMessage="There is No poll"
+              }
+              this.getControlled = true
+            }else{
+              this.errorMessage = "Invalid key"
+              this.getControlled = false;
+            }
+//            socket.emit('voting',this.title)
+          })
+          .catch(error=>{
+            this.getControlled = false;
+            this.errorMessage = error
+          })
+        },
+        switchTo:function(id,url){
+          this.errorMessage = ""
+          fetch("/controll/switch",{
+            method:'POST',
+            headers:{'Content-Type':'application/json'},
+            body:JSON.stringify({authkey:this.authkey,url:url,id:id})
+          })
+          .then(response=>response.json())
+          .then(data=>{
+            if(data.auth==="OK"){
+              this.resultBoxes = data.result
+              if(this.resultBoxes.length>0){
+                this.resultBoxes.sort((a,b)=>a.ID-b.ID)
+              }else{
+                this.errorMessage="No poll"
+              }
+            }else{
+              this.errorMessage = "Something wrong"
+            }
+          })
+          .catch(error=>{
+            this.errorMessage = error
+          })
+
+        },
+        getUrl:function(box){
+          if(box.TYPE==="ALT"){
+            return "/alt?title="+box.title
+          }else if(box.TYPE==="SURVEY"){
+            params = ""
+            if(box.STEP!=5){ params += "&num="+box.STEP }
+            if(box.D1){ params += "&d1="+box.D1 }
+            if(box.D2){ params += "&d2="+box.D2 }
+            if(box.D3){ params += "&d3="+box.D3 }
+            if(box.D4){ params += "&d4="+box.D4 }
+            if(box.D5){ params += "&d5="+box.D5 }
+            return "/survey?title="+box.title+params
+          }else if(box.TYPE==="MAP"){
+            params = ""
+            params += "&image=" + box.IMG
+            params += "&width=" + box.IMG_w
+            return "/map?title="+box.title+params
+          }else if(box.TYPE==="TEXT"){
+            return "/text?title="+box.title
+          }
+          return "/"
+        },
+        getFullUrl:function(box){
+          const host = window.location.host
+          const protocol = window.location.protocol
+
+          return protocol+"//"+host+this.getUrl(box)
+        },
+        postCreate:function(){
+          this.creatingPoll = false
+          this.new_title = ""
+          this.new_type  = "ALT"
+          this.new_step_num = 5
+          this.new_step_messages = []
+          this.new_map_image = ""
+          this.new_map_image_url = ""
+          this.new_map_image_width = 500
+        },
+        showResult:function(type){
+          if(type==="all"){
+            window.open('/controll/result?type=all&authkey='+this.authkey,'_blank')
+          }else if(type==="countup"){
+            window.open('/controll/result?type=countup&authkey='+this.authkey,'_blank')
+          }
+        },
+        downloadResult:function(type){
+          if(type==="all"){
+            fetch("/controll/getall",{
+              method:'POST',
+              headers:{'Content-Type':'application/json'},
+              body:JSON.stringify({authkey:this.authkey})
+            })
+            .then(response=>response.json())
+            .then(data=>{
+              if(data.auth==="OK"){
+                let blob = new Blob([JSON.stringify(data.result)],{type:'application/json'})
+                let link = document.createElement('a')
+                link.href = window.URL.createObjectURL(blob)
+                link.download = 'volavote_allresult_'+Date.now()+'.json'
+                link.click()
+              }else{
+                this.errorMessage = "Invalid key"
+              }
+            })
+            .catch(error=>{
+              this.errorMessage = error
+            })
+          }else if(type==="countup"){
+            let blob = new Blob([JSON.stringify(this.resultBoxes)],{type:'application/json'})
+            let link = document.createElement('a')
+            link.href = window.URL.createObjectURL(blob)
+            link.download = 'volavote_countup_'+Date.now()+'.json'
+            link.click()
+          }
+        },
+        uploadAll:function(){
+          const file = this.$refs.file.files[0]
+          if(file){
+            const reader = new FileReader();
+            reader.onload = e =>{
+              let importedJson = JSON.parse(e.target.result)
+              console.log(importedJson)
+              fetch("/controll/replace",{
+              method:'POST',
+              headers:{'Content-Type':'application/json'},
+              body:JSON.stringify({authkey:this.authkey,box:importedJson})
+              })
+              .then(response=>response.json())
+              .then(data=>{
+                if(data.auth==="OK"){
+                }else{
+                  this.errorMessage = "Invalid key"
+                }
+              })
+              .catch(error=>{
+                this.errorMessage = error
+              })
+
+            }
+            reader.readAsText(file)
+          }
+        }
+      }
+    })
+  </script>
+</html>

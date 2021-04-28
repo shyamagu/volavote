@@ -42,6 +42,9 @@
             this.positions = box.MAP
           }
         })
+        socket.on('switch',(url)=>{
+          window.location.href=url
+        })
       },
       methods:{
         onClickMap: function(e){
