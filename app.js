@@ -8,6 +8,12 @@ var debug = require('debug')('volavote:server');
 var http = require('http');
 require('dotenv').config()
 
+if(!process.env.ANONYMOUS){
+  process.env.ANONYMOUS="false"
+}
+if(!process.env.KEY){
+  process.env.KEY="key"
+}
 var app = express();
 app.use(session({
   secret: 'keyboard cat',
