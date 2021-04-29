@@ -29,6 +29,10 @@ class VoteBox {
         this.votebox[title]["RESULT"][sessionid]=vote
     }
 
+    static voteMulti(title,sessionid,vote) {
+        this.votebox[title]["RESULT"][sessionid+Date.now()]=vote
+    }
+
     static getAll(){
         return this.votebox
     }
@@ -95,6 +99,7 @@ class VoteBox {
             }
         }else if(type === "TEXT"){
             let result = this.votebox[title]["RESULT"]
+            returnBox["CONSTRAINT"]=this.votebox[title]["METADATA"]["CONSTRAINT"]
             returnBox["MESSAGES"]={}
             for(let key in result){
                 returnBox["MESSAGES"][result[key]] = (returnBox["MESSAGES"][result[key]])? returnBox["MESSAGES"][result[key]]+1 : 1;

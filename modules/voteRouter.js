@@ -11,7 +11,12 @@ module.exports = function(io) {
 
     router.get('/', function(req, res, next) {
         const fullurl = req.protocol + '://' + req.get('host') + req.originalUrl;
-        res.render('index', { title: "volavote", url:fullurl});
+
+        if(req.acceptsLanguages('ja','en')=="ja"){
+            res.render('index_jp', { title: "volavote", url:fullurl});
+        }else{
+            res.render('index', { title: "volavote", url:fullurl});
+        }
     });
 
     router.get('/alt', function(req, res, next) {
@@ -83,6 +88,11 @@ module.exports = function(io) {
 
     router.get('/text', function(req, res, next) {
         const title = req.query.title
+        let constraint = req.query.constraint
+        if(constraint != "MULTI"){
+            constraint = "SINGLE"
+        }
+
         let label_post = "Post"
         let label_repost ="Re-Post"
         let label_agree = "Agree!"
@@ -92,12 +102,12 @@ module.exports = function(io) {
             label_agree = "同意！"
         }
         if(process.env.ANONYMOUS=="true"){
-            makeNewTextVote(title)
-            res.render('text', { title: title, post:label_post, repost:label_repost, agree:label_agree});
+            makeNewTextVote(title,constraint)
+            res.render('text', { title: title, post:label_post, repost:label_repost, agree:label_agree, constraint:constraint});
         }else{
             let checked = voteBox.checkPoll(title)
             if(checked){
-                res.render('text', { title: title, post:label_post, repost:label_repost, agree:label_agree});
+                res.render('text', { title: title, post:label_post, repost:label_repost, agree:label_agree, constraint:checked.METADATA.CONSTRAINT});
             }else{
                 next(createError(404));
             }
@@ -106,7 +116,7 @@ module.exports = function(io) {
 
 
     function makeNewALTVote(title){
-        voteBox.setMetadata(title,"ALT")
+        voteBox.setMetadata(title,"ALT",{})
     }
 
     function makeNewSurveyVote(title,num,d1,d2,d3,d4,d5){
@@ -117,20 +127,27 @@ module.exports = function(io) {
         voteBox.setMetadata(title,"MAP",{"IMG":image,"IMG_w":width})
     }
 
-    function makeNewTextVote(title){
-        voteBox.setMetadata(title,"TEXT")
+    function makeNewTextVote(title,constraint){
+        voteBox.setMetadata(title,"TEXT",{CONSTRAINT:constraint})
     }
 
     router.post('/vote',function(req,res,next){
         const vote = req.body
 
-        if(!voteBox.validateVote(vote)){
+        let checked = voteBox.checkPoll(vote.title)
+        if(!checked || !voteBox.validateVote(vote)){
             res.json("NG")
             return
         }
 
-        const judge = vote.vote 
-        voteBox.vote(vote.title,req.session.id,judge)
+        const judge = vote.vote
+
+        if(checked.METADATA.CONSTRAINT==="MULTI"){
+            voteBox.voteMulti(vote.title,req.session.id,judge)
+        }else{
+            voteBox.vote(vote.title,req.session.id,judge)
+        }
+
         io.emit('voting',voteBox.countUp(vote.title))
 
         res.json("OK")
@@ -192,7 +209,7 @@ module.exports = function(io) {
 
                 makeNewMapVote(title,image,width)
             }else if(type === "TEXT"){
-                makeNewTextVote(title)
+                makeNewTextVote(title,req.body.constraint)
             }
             res.json({auth:"OK",result:voteBox.countUpAll()})
         }else{

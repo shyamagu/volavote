@@ -92,6 +92,17 @@
               <input class="make_poll_input" type="number" max="1600" min="100" v-model="new_map_image_width">px (100px~500px*~1600px)
             </div>
           </div>
+          <div v-if="new_type=='TEXT'">
+            <div class="make_poll_item">Constraint</div>
+            <div class="make_poll_value">
+              <select class="make_poll_input" v-model="new_text_type">
+                <option v-for="option in new_text_type_options" v-bind:value="option.value">
+                  {{option.text}}
+                </option>
+              </select>
+            </div>
+          </div>
+
           <button class="make_poll_botton_create" @click="createPoll">Create Poll</button>
         </div>
       </div>
@@ -131,6 +142,11 @@
         ],
         new_map_image_url:"",
         new_map_image_width:500,
+        new_text_type:"SINGLE",
+        new_text_type_options:[
+          {text: '1 Person : 1 Message',value:"SINGLE"},
+          {text: '1 Person : N Message',value:"MULTI"},
+        ],
         getControlled:false,
         creatingPoll:false,
       },
@@ -175,7 +191,8 @@
               num:this.new_step_num,
               ds:this.new_step_messages,
               image:this.new_map_image? this.new_map_image:this.new_map_image_url,
-              width:this.new_map_image_width
+              width:this.new_map_image_width,
+              constraint:this.new_text_type,
               })
           })
           .then(response => response.json())
@@ -270,7 +287,8 @@
             params += "&width=" + box.IMG_w
             return "/map?title="+box.title+params
           }else if(box.TYPE==="TEXT"){
-            return "/text?title="+box.title
+            params = ""
+            return "/text?title="+box.title+"&constraint="+box.CONSTRAINT
           }
           return "/"
         },
@@ -289,6 +307,7 @@
           this.new_map_image = ""
           this.new_map_image_url = ""
           this.new_map_image_width = 500
+          this.new_text_type = "SINGLE"
         },
         showResult:function(type){
           if(type==="all"){

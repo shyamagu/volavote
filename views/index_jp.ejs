@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
+    <title><%= title %></title>
+    <link rel='stylesheet' href='/stylesheets/style.css' />
+  </head>
+  <body>
+    <div class="explain_area">
+      <div class="explain_title"><%= title %></div>
+      <div class="explain_sub_title_underline">Simple volatile voting web application</div>
+      <div class="explain_sub_title">
+        4種類の投票サイトを作成して、そのURLを共有して使うことができます(下図参考)
+        <br>
+        ※サーバのダウンとともにデータは失われます（永続化していないです。）
+      </div>
+      <div class="explain_sub_title">
+        <a href="<%=url %>controll">管理画面</a> で新しい投票サイトを作成できます。(初期キーは'1234'です。環境変数(process.env.KEY)で指定することができます)
+        <br>
+        もしあなたがキーを知らなければ、管理者にサイトの作成について聞いてみて下さい。(匿名で作成できるモードもあります)
+      </div>
+
+      <div class="explain_block">
+        <div class="explain_survey">YES-NO</div>
+        <img src="/images/yesno_sample.png" width=180>
+      </div>
+      <div class="explain_block">
+        <div class="explain_survey">N-Step</div>
+        <img src="/images/multi_sample.png" width=180>
+      </div>
+      <div class="explain_block">
+        <div class="explain_survey">MAP</div>
+        <img src="/images/map_sample.png" width=130>
+      </div>
+      <div class="explain_block">
+        <div class="explain_survey">Free-Text</div>
+        <img src="/images/text_sample.png" width=180>
+      </div>
+    </div>
+    <div class="explain_area">
+      <div class="explain_appendix">もしご自身で本サイトをホストしたければ、Docker Hub の Imageは <a href="https://hub.docker.com/repository/docker/shyamagu/volavote">shyamagu/volavote</a> を使って下さい
+      <br>あるいは GitHub の <a href="https://github.com/shyamagu/volavote">shyamagu/volavote</a> からコードをクローンしてデプロイして下さい</div>
+    </div>
+  </body>
+</html>

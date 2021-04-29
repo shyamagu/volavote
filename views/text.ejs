@@ -18,12 +18,18 @@
         </div>
       </div>
       <div class="list_display_area">
-      <div class="list_area" v-for="msg in messages">
-        <button v-if="yourMessage!=msg.key" class="agree_button" @click="agreeMessage(msg.key)">{{label_agree}}</button>
-        <button disabled v-if="yourMessage==msg.key" class="agree_button">{{label_agree}}</button>
-        <div class="agree_number_area" :class="{same_message_area: yourMessage==msg.key}">{{msg.value}}</div>
-        <div class="list_message_area" :class="{same_message_area: yourMessage==msg.key}">{{msg.key}}</div>
-      </div>
+        <div v-if="constraint!='MULTI'" class="list_area" v-for="msg in messages">
+          <button v-if="yourMessage!=msg.key" class="agree_button" @click="agreeMessage(msg.key)">{{label_agree}}</button>
+          <button disabled v-if="yourMessage==msg.key" class="agree_button">{{label_agree}}</button>
+          <div class="agree_number_area" :class="{same_message_area: yourMessage==msg.key}">{{msg.value}}</div>
+          <div class="list_message_area" :class="{same_message_area: yourMessage==msg.key}">{{msg.key}}</div>
+        </div>
+        <div v-if="constraint=='MULTI'" class="list_area" v-for="msg in messages">
+          <button v-if="yourMessages.indexOf(msg.key) < 0" class="agree_button" @click="agreeMessage(msg.key)">{{label_agree}}</button>
+          <button disabled v-if="yourMessages.indexOf(msg.key) >= 0" class="agree_button">{{label_agree}}</button>
+          <div class="agree_number_area">{{msg.value}}</div>
+          <div class="list_message_area">{{msg.key}}</div>
+        </div>
       </div>
     </div>
   </body>
@@ -40,6 +46,8 @@
         label_post:'<%= post %>',
         label_repost:'<%= repost %>',
         label_agree:'<%= agree %>',
+        constraint: '<%= constraint %>',
+        yourMessages:[],
       },
       mounted() {
         socket.emit('voting',this.title)
@@ -68,6 +76,9 @@
           .then(response=>{
             //OK
             this.yourMessage = this.message
+            if(this.constraint==="MULTI"){
+              this.yourMessages.push(this.message)
+            }
           })
           .catch((error)=>{
             this.errorMessage = error
