@@ -20,6 +20,15 @@
             <input type="radio" id="enable"  v-model="anonymous" value="true" @click="checkAnonymous('true')"><label for="enable">Enable</label>
             <input type="radio" id="disable" v-model="anonymous" value="false" @click="checkAnonymous('false')"><label for="disable">Disable</label>
           </div>
+          <div v-if="anonymous=='false'" class="options">
+            Require poll CODE:
+            <input type="radio" id="enable"  v-model="requireCode" value="true" @click="applyRequireCode()"><label for="enable">Enable</label>
+            <input type="radio" id="disable" v-model="requireCode" value="false" @click="changeRequireCode()"><label for="disable">Disable</label>
+          </div>
+          <div class="code_input" v-if="requireCode == 'true'">
+            {{pollCode}}
+          </div>
+          <br>
           <div class="options">
             <button @click="showResult('all')">Show All(json)</button>
             <button @click="downloadResult('all')">Download All(json)</button>
@@ -37,12 +46,13 @@
         <div v-for="(box,index) in resultBoxes" :key="box.ID">
           <div class="result_line_switch":class="{current_line: box.CURRENT==true}"><button class="switch_button" :class="{current_line: box.CURRENT==true}" @click="switchTo(box.ID,getUrl(box))">{{box.CURRENT? "CURRENT":"SWITCH"}}</button></div>
           <div class="result_line_title" :class="{current_line: box.CURRENT==true}"><a :href="getUrl(box)" target="_blank" rel="noopener noreferrer">{{box.title}}</a></div>
-          <div class="result_line_copy"><button class="copy_button" v-clipboard:copy="getFullUrl(box)">Copy URL</button></div>
           <div class="result_line_type"  :class="{current_line: box.CURRENT==true}">{{box.TYPE}}</div>
           <div v-if="box.TYPE=='ALT'" class="result_line_result" :class="{current_line: box.CURRENT==true}">YES:{{box.YES}},NO:{{box.NO}}</div>
           <div v-if="box.TYPE=='SURVEY'" class="result_line_result" :class="{current_line: box.CURRENT==true}">S1:{{box.S1}},S2:{{box.S2}},S3:{{box.S3}},S4:{{box.S4}},S5:{{box.S5}}</div>
           <div v-if="box.TYPE=='MAP'" class="result_line_result" :class="{current_line: box.CURRENT==true}">{{box.MAP.length}} points in MAP</div>
-          <div v-if="box.TYPE=='TEXT'" class="result_line_result" :class="{current_line: box.CURRENT==true}">messages</div>
+          <div v-if="box.TYPE=='TEXT'" class="result_line_result" :class="{current_line: box.CURRENT==true}">{{Object.keys(box.MESSAGES).length}} messages</div>
+          <div class="result_line_copy"><button class="copy_button" v-clipboard:copy="getFullUrl(box)">Copy URL</button></div>
+          <div class="result_line_copy"><button class="copy_button" @click="showQR(box.title,getFullUrl(box),pollCode)">Show QR</button></div>
         </div>
       </div>
       <div v-if="getControlled" class="making_area">
@@ -111,12 +121,14 @@
   <script>
     const socket = io();
     const VueClipboard  = window['VueClipboard'];
+    const codeString = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789"
     Vue.use(VueClipboard)
     var app = new Vue({
       el: '#app',
       data: {
         authkey:"",
-        anonymous:false,
+        anonymous:"false",
+        requireCode:"false",
         resultBoxes:[],
         errorMessage:"",
         new_title:"",
@@ -149,6 +161,7 @@
         ],
         getControlled:false,
         creatingPoll:false,
+        pollCode:Array.from(Array(6)).map(()=>codeString[Math.floor(Math.random()*codeString.length)]).join('')
       },
       mounted() {
         socket.on('voting',(box)=>{
@@ -158,6 +171,11 @@
       methods:{
         checkAnonymous:function(flag){
           if(flag == this.anonymous) return
+          if(flag==='true'){
+            this.requireCode = 'false'
+            this.pollCode = Array.from(Array(6)).map(()=>codeString[Math.floor(Math.random()*codeString.length)]).join('')
+          }
+
           this.errorMessage = ""
           fetch("/controll/anonymous",{
             method:'POST',
@@ -175,6 +193,28 @@
           .catch(error=>{
             this.errorMessage = error
           })
+        },
+        applyRequireCode:function(){
+          this.errorMessage = ""
+          fetch("/controll/code",{
+            method:'POST',
+            headers:{'Content-Type':'application/json'},
+            body:JSON.stringify({authkey:this.authkey,code:this.pollCode})
+          })
+          .then(response=>response.json())
+          .then(data=>{
+            if(data.auth==="OK"){
+            }else{
+              this.errorMessage = "Invalid key"
+              this.getControlled= false
+            }
+          })
+          .catch(error=>{
+            this.errorMessage = error
+          })
+        },
+        changeRequireCode:function(){
+          this.pollCode = Array.from(Array(6)).map(()=>codeString[Math.floor(Math.random()*codeString.length)]).join('')
         },
         startToCreateNewPoll:function(){
           this.creatingPoll = true
@@ -227,6 +267,10 @@
             if(data.auth === "OK"){
               this.resultBoxes = data.result
               this.anonymous = data.anonymous
+              if(data.code){
+                this.pollCode = data.code
+                this.requireCode = "true"
+              }
               if(this.resultBoxes.length>0){
                 this.resultBoxes.sort((a,b)=>a.ID-b.ID)
               }else{
@@ -298,6 +342,9 @@
 
           return protocol+"//"+host+this.getUrl(box)
         },
+        showQR:function(title,url,code){
+          window.open('/controll/showqr?title='+title+'&code='+code+'&url='+url,'_blank')
+        },
         postCreate:function(){
           this.creatingPoll = false
           this.new_title = ""
@@ -352,7 +399,6 @@
             const reader = new FileReader();
             reader.onload = e =>{
               let importedJson = JSON.parse(e.target.result)
-              console.log(importedJson)
               fetch("/controll/replace",{
               method:'POST',
               headers:{'Content-Type':'application/json'},

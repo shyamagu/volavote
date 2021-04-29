@@ -6,7 +6,15 @@ module.exports = function(io) {
     var createError = require('http-errors');
 
     router.use(function (req,res,next){
-        next()
+        if(process.env.ANONYMOUS=="false" && process.env.CODE){
+            if(req.session.CODE === process.env.CODE){
+                next()
+            }else{
+                res.render('login', { title: "Enter CODE", url:req.url});
+            }
+        }else{
+            next()
+        }
     })
 
     router.get('/', function(req, res, next) {
@@ -151,117 +159,6 @@ module.exports = function(io) {
         io.emit('voting',voteBox.countUp(vote.title))
 
         res.json("OK")
-    })
-
-    router.get('/controll',function(req,res,next){
-        res.render('controll')
-    })
-
-    router.post('/controll/get',function(req,res,next){
-        const authkey = req.body.authkey
-        if(authkey === process.env.KEY){
-            const anonymous = process.env.ANONYMOUS? process.env.ANONYMOUS: false
-            res.json({auth:"OK",result:voteBox.countUpAll(),anonymous:anonymous})
-        }else{
-            res.json({auth:"NG"})
-        }
-    })
-
-    router.post('/controll/switch',function(req,res,next){
-        const authkey = req.body.authkey
-        if(authkey === process.env.KEY){
-            const id = req.body.id
-            const url= req.body.url
-            voteBox.setCurrent(id)
-            io.emit('switch',url)
-            res.json({auth:"OK",result:voteBox.countUpAll()})
-        }else{
-            res.json({auth:"NG"})
-        }
-    })
-
-    router.post('/controll/create',function(req,res,next){
-        const authkey = req.body.authkey
-        if(authkey === process.env.KEY){
-            const title = req.body.title
-            const type  = req.body.type
-            
-            if(type === "ALT"){
-                makeNewALTVote(title)
-            }else if(type === "SURVEY"){
-                let num = req.body.num
-                const ds = req.body.ds
-                if(!num) num = 5
-                if(num < 2 || num > 5) num=5
-
-                makeNewSurveyVote(title,num,ds[0],ds[1],ds[2],ds[3],ds[4],ds[5])
-            }else if(type === "MAP"){
-                let image = req.body.image
-                const width = req.body.width
-                if(isNaN(width)) width=500
-                if(image==="japan"){
-                    image = "/images/japan.gif"
-                }else if(image === "world"){
-                    image = "/images/world_img.png"
-                }else if(image === "kanto"){
-                    image = "/images/kanto.gif"
-                }
-
-                makeNewMapVote(title,image,width)
-            }else if(type === "TEXT"){
-                makeNewTextVote(title,req.body.constraint)
-            }
-            res.json({auth:"OK",result:voteBox.countUpAll()})
-        }else{
-            res.json({auth:"NG"})
-        }
-    })
-
-    router.post('/controll/anonymous',function(req,res,next){
-        const authkey = req.body.authkey
-        if(authkey === process.env.KEY){
-            const anonymous = req.body.anonymous
-            process.env.ANONYMOUS = anonymous
-            res.json({auth:"OK"})
-        }else{
-            res.json({auth:"NG"})
-        }
-    })
-
-    router.post('/controll/getall',function(req,res,next){
-        const authkey = req.body.authkey
-        if(authkey === process.env.KEY){
-            res.json({auth:"OK",result:voteBox.getAll()})
-        }else{
-            res.json({auth:"NG"})
-        }
-    })
-
-    router.get('/controll/result',function(req,res,next){
-        const type = req.query.type
-        const authkey = req.query.authkey
-        if(authkey === process.env.KEY){
-
-            if(type==="all"){
-                res.render('box',{box:JSON.stringify(voteBox.getAll(),null,4)})
-            }else if(type==="countup"){
-                res.render('box',{box:JSON.stringify(voteBox.countUpAll(),null,4)})
-            }
-        }else{
-            res.render('box',{box:""})
-        }
-    })
-
-    router.post('/controll/replace',function(req,res,next){
-        const authkey = req.body.authkey
-        const box = req.body.box
-        if(authkey === process.env.KEY){
-            voteBox.replace(box)
-            io.emit('voting',{})
-            res.json({auth:"OK"})
-        }else{
-            res.json({auth:"NG"})
-        }
     })
 
  return router

@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
+    <title><%= title %></title>
+    <script src="https://cdn.jsdelivr.net/npm/vue@2/dist/vue.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/vue-qriously@1.1.1/dist/vue-qriously.min.js"></script>
+    <link rel='stylesheet' href='/stylesheets/style.css' />
+  </head>
+  <body>
+    <div id="app">
+      <div class="vote_area">
+        <div class="code_title">{{title}}</div>
+        <input class="code_input" type="text" size=6 v-model="inputCode">
+        <button class="code_submit" @click="submitCode">Submit</button>
+        <div class="error_message" v-if="errorMessage">{{errorMessage}}</div>
+      </div>
+    </div>
+  </body>
+  <script>
+    var app = new Vue({
+      el: '#app',
+      data: {
+        title: '<%= title %>',
+        url: '<%= url %>',
+        inputCode:"",
+        errorMessage:"",
+      },
+      mounted() {
+      },
+      methods:{
+        submitCode:function(){
+          fetch("/controll/check",{
+            method:'POST',
+            headers:{'Content-Type':'application/json'},
+            body:JSON.stringify({code:this.inputCode,url:this.url})
+          })
+          .then(response=>response.json())
+          .then(data=>{
+            //OK
+            if(data.check==="OK"){
+              window.location.href=this.url
+            }
+            if(data.check==="NG"){
+              this.errorMessage = "Invalid CODE"
+            }
+          })
+          .catch(error=>{
+            this.errorMessage = error
+          })
+        },
+      }
+    })
+  </script>
+</html>
