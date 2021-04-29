@@ -1,39 +1,41 @@
 <!DOCTYPE html>
 <html>
   <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
     <title><%= title %></title>
     <link rel='stylesheet' href='/stylesheets/style.css' />
   </head>
   <body>
     <div class="explain_area">
       <div class="explain_title"><%= title %></div>
-      <div class="explain_sub_title">Simple volatile voting web application</div>
+      <div class="explain_sub_title_underline">Simple volatile voting web application</div>
       <div class="explain_sub_title">
         4 type of poll you can make and share the url to your audience like below.
         <br>
         *please note that all data will be lost when server down.(no storage)
       </div>
       <div class="explain_sub_title">
-        Visit <a href="<%=url %>controll">controll page</a> to make a new poll if you are admin.
+        Visit <a href="<%=url %>controll">controll page</a> to make a new poll if you are admin.(default key is '1234' or use process.env.KEY)
         <br>
         For visitor, please contact admin of this server to make a poll.
       </div>
 
       <div class="explain_block">
         <div class="explain_survey">YES-NO</div>
-        <img src="/images/yesno_sample.png" width=200>
+        <img src="/images/yesno_sample.png" width=180>
       </div>
       <div class="explain_block">
         <div class="explain_survey">N-Step</div>
-        <img src="/images/multi_sample.png" width=200>
+        <img src="/images/multi_sample.png" width=180>
       </div>
       <div class="explain_block">
         <div class="explain_survey">MAP</div>
-        <img src="/images/map_sample.png" width=200>
+        <img src="/images/map_sample.png" width=130>
       </div>
       <div class="explain_block">
         <div class="explain_survey">Free-Text</div>
-        <img src="/images/text_sample.png" width=200>
+        <img src="/images/text_sample.png" width=180>
       </div>
     </div>
     <div class="explain_area">

@@ -16,6 +16,12 @@ body {
   margin-bottom: 20px;
 }
 
+.explain_sub_title_underline{
+  font-size: 20px;
+  margin-bottom: 20px;
+  text-decoration: underline;
+}
+
 .explain_appendix{
   font-size:20px;
 }
@@ -23,8 +29,8 @@ body {
 .explain_block{
   vertical-align:top;
   display: inline-block;
-  width:200px;
-  height:300px;
+  width:190px;
+  height:200px;
   font-size: 16px;
   border: solid 1px #999;
 }
@@ -365,6 +371,7 @@ body {
   margin:auto;
 }
 
+
 .survey_button:hover{
   background: #66F;
 }
@@ -377,4 +384,107 @@ body {
   margin:auto;
   margin-top:50px;
   position: relative;
+}
+
+@media screen and (max-width:800px){
+  
+  .vote_area{
+    min-width: 100%;
+  }
+
+  .vote_title{
+    width:100%;
+    font-size: 18px;
+    margin-top: 50px;
+  }
+
+  .one_area{
+    width:60px;
+    height:100px;
+  }
+  
+  .button_area{
+    width:60px;
+  }
+
+  .survey_bar{
+    max-width:60px;
+    max-height:100px;
+    background-color: #CCC;
+  }
+
+  .survey_button_area{
+    width:60px;
+  }
+  
+  .survey_button{
+    font-size: 16px;
+    color: #339;
+    width:50px;
+    height:50px;
+  }
+
+  .message_area{
+    font-size:24px;
+    width:80%;
+  }
+  
+  .message_text{
+    width:60%;
+  }
+  
+  .message_text_area{
+    font-size: 16px;
+    width:100%;
+    height:72px;
+  }
+  
+  .message_post{
+    font-size: 16px;
+    width:90px;
+  }
+  
+  .message_post_button{
+    width:90px;
+    height:72px;
+  }
+  
+  .message_post_button:disabled{
+    cursor: default;
+    color: #9C9;
+    opacity: 0.6;
+  }
+  
+  .list_display_area{
+    margin-top:40px;
+  }
+  
+  .list_area{
+    font-size:16px;
+    width:100%;
+    height:64px;
+    text-align: center;
+  }
+  
+  .agree_button_area{
+    font-size: 16px;
+    width:64px;
+  }
+  
+  .agree_button{
+    width:64px;
+    height:64px;
+  }
+  
+  .agree_number_area{
+    font-size: 16px;
+    height:64px;
+    width:64px;
+  }
+  
+  .list_message_area{
+    font-size: 16px;
+    height:64px;
+    width:50%;
+  }
 }
