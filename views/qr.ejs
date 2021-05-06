@@ -12,11 +12,10 @@
     <div id="app">
       <div class="vote_area">
         <div class="vote_title">{{title}}</div>
+        <div class="vote_title">{{code}}</div>
         <br>
         <br>
         <qriously :value="url" :size="300" />
-        <br>
-        <div class="vote_title">{{code}}</div>
       </div>
     </div>
   </body>
@@ -30,6 +29,7 @@
         code: '<%= code %>',
       },
       mounted() {
+        console.log(this.code)
       },
       methods:{
       }
