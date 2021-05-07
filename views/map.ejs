@@ -15,13 +15,9 @@
         <div class="map_area" :style="`width:<%= width %>px`">
           <img @click="onClickMap" src=<%= image %> width=<%= width %> border=5/>
           <div v-for="position in positions":style="`position:absolute;top:${position[1]}px;left:${position[0]}px;pointer-events:none;`" >
-            <img src="/images/point.png"/>
+            <img class="map_pin_anime" src="/images/point.png"/>
           </div>
         </div>
-        <!--
-        <button class="yes_button" :class="{votedYesStyle: votedYes}" :style="`width:${sizeYes}px;height:${sizeYes}px`" @click.prevent="sayYes">Yes<br/>{{countYes}}</button>
-        <button class="no_button" :class="{votedNoStyle: votedNo}" :style="`width:${sizeNo}px;height:${sizeNo}px`" @click.prevent="sayNo">No</br>{{countNo}}</button>
-        -->
       </div>
     </div>
   </body>

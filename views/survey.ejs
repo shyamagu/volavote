@@ -12,8 +12,8 @@
     <div id="app">
       <div class="vote_area">
         <div class="vote_title"><%= title %></div>
-        <div v-for="index of num" class="one_area">
-          <div class="survey_bar" :style="`height:${bars[index-1]}px`"></div>
+        <div ref="bar" v-for="index of num" class="one_area">
+          <div class="survey_bar" :style="`height:${bars[index-1]}px;`"></div>
           {{counts[index-1]}}
         </div>
         <br/>
@@ -29,19 +29,23 @@
   </body>
   <script>
     const socket = io();
-    const maxh = 300;
     var app = new Vue({
       el: '#app',
       data: {
+        maxh:300,
         title: '<%= title %>',
         num: Number('<%= num %>'),
         counts: [0,0,0,0,0],
+        save_total :0,
         displays:['<%= d1 %>','<%= d2 %>','<%= d3 %>','<%= d4 %>','<%= d5 %>'],
-        bars:[maxh,maxh,maxh,maxh,maxh],
+        bars:[300,300,300,300,300],
         voted:0,
         errorMessage: '',
       },
       mounted() {
+        this.resizeBar()
+        window.addEventListener('resize',this.resizeBar)
+
         socket.emit('voting',this.title)
         socket.on('voting',(box)=>{
           if(this.title === box.title){
@@ -49,15 +53,23 @@
             let total = ss.reduce(function(sum,element){
               return sum+element;
             },0)
+            this.save_total = total
             this.counts=[Number(box.S1),Number(box.S2),Number(box.S3),Number(box.S4),Number(box.S5)]
-            this.bars=[maxh-Number(box.S1)*maxh/total,maxh-Number(box.S2)*maxh/total,maxh-Number(box.S3)*maxh/total,maxh-Number(box.S4)*maxh/total,maxh-Number(box.S5)*maxh/total]
+            this.bars=[this.maxh-Number(box.S1)*this.maxh/total,this.maxh-Number(box.S2)*this.maxh/total,this.maxh-Number(box.S3)*this.maxh/total,this.maxh-Number(box.S4)*this.maxh/total,this.maxh-Number(box.S5)*this.maxh/total]
           }
         })
         socket.on('switch',(url)=>{
           window.location.href=url
         })
       },
+      beforeDestroy(){
+        window.removeEventListener('resize',this.resizeBar)
+      },
       methods:{
+        resizeBar: function(){
+          this.maxh = this.$refs.bar[0].clientHeight
+          this.bars=[this.maxh-this.counts[0]*this.maxh/this.save_total,this.maxh-this.counts[1]*this.maxh/this.save_total,this.maxh-this.counts[2]*this.maxh/this.save_total,this.maxh-this.counts[3]*this.maxh/this.save_total,this.maxh-this.counts[4]*this.maxh/this.save_total]
+        },
         voteSurvey: function(index){
           this.vote({title:this.title, vote:"S"+index, type:"SURVEY"})
           this.voted = index
