@@ -152,7 +152,21 @@ module.exports = function(io) {
         const url = req.query.url
         const code = req.query.code
 
-        res.render('qr', { title: title, url:url, code:code});
+        const type = req.query.type
+        let path = "/"
+        if(type === "ALT"){
+            path +="alt?title=" + encodeURI(title)
+        }else if(type === "SURVEY"){
+            path +="survey?title=" + encodeURI(title)
+        }else if(type === "MAP"){
+            path +="map?title=" + encodeURI(title) 
+        }else if(type === "TEXT"){
+            path +="text?title=" + encodeURI(title)
+        }
+
+        const fullurl = req.protocol + '://' + req.get('host') + path;
+
+        res.render('qr', { title: title, url:fullurl, code:code});
     })
 
     router.post('/check',function(req,res,next){

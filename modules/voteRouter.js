@@ -54,8 +54,13 @@ module.exports = function(io) {
         const d4 = req.query.d4
         const d5 = req.query.d5
         if(process.env.ANONYMOUS=="true"){
-            makeNewSurveyVote(title,num,d1,d2,d3,d4,d5)
-            res.render('survey', { title: title, num:num, d1:d1, d2:d2, d3:d3, d4:d4, d5:d5});
+            let checked = voteBox.checkPoll(title)
+            if(checked){
+                res.render('survey', { title: title, num:checked.METADATA.STEP, d1:checked.METADATA.D1, d2:checked.METADATA.D2, d3:checked.METADATA.D3, d4:checked.METADATA.D4, d5:checked.METADATA.D5});
+            }else{
+                makeNewSurveyVote(title,num,d1,d2,d3,d4,d5)
+                res.render('survey', { title: title, num:num, d1:d1, d2:d2, d3:d3, d4:d4, d5:d5});
+            }
         }else{
             let checked = voteBox.checkPoll(title)
             if(checked){
@@ -81,8 +86,13 @@ module.exports = function(io) {
         }
 
         if(process.env.ANONYMOUS=="true"){
-            makeNewMapVote(title,image,width)
-            res.render('map', { title: title, image: image, width: width});
+            let checked = voteBox.checkPoll(title)
+            if(checked){
+                res.render('map', { title: title, image: checked.METADATA.IMG, width: checked.METADATA.IMG_w});
+            }else{
+                makeNewMapVote(title,image,width)
+                res.render('map', { title: title, image: image, width: width});
+            }
         }else{
             let checked = voteBox.checkPoll(title)
             if(checked){
@@ -110,8 +120,13 @@ module.exports = function(io) {
             label_agree = "同意！"
         }
         if(process.env.ANONYMOUS=="true"){
-            makeNewTextVote(title,constraint)
-            res.render('text', { title: title, post:label_post, repost:label_repost, agree:label_agree, constraint:constraint});
+            let checked = voteBox.checkPoll(title)
+            if(checked){
+                res.render('text', { title: title, post:label_post, repost:label_repost, agree:label_agree, constraint:checked.METADATA.CONSTRAINT});
+            }else{
+                makeNewTextVote(title,constraint)
+                res.render('text', { title: title, post:label_post, repost:label_repost, agree:label_agree, constraint:constraint});
+            }
         }else{
             let checked = voteBox.checkPoll(title)
             if(checked){

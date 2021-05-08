@@ -52,7 +52,7 @@
           <div v-if="box.TYPE=='MAP'" class="result_line_result" :class="{current_line: box.CURRENT==true}">{{box.MAP.length}} points in MAP</div>
           <div v-if="box.TYPE=='TEXT'" class="result_line_result" :class="{current_line: box.CURRENT==true}">{{Object.keys(box.MESSAGES).length}} messages</div>
           <div class="result_line_copy"><button class="copy_button" v-clipboard:copy="getFullUrl(box)">Copy URL</button></div>
-          <div class="result_line_copy"><button class="copy_button" @click="showQR(box.title,getFullUrl(box),pollCode)">Show QR</button></div>
+          <div class="result_line_copy"><button class="copy_button" @click="showQR(box.title,box.TYPE,pollCode)">Show QR</button></div>
         </div>
       </div>
       <div v-if="getControlled" class="making_area">
@@ -342,8 +342,8 @@
 
           return protocol+"//"+host+this.getUrl(box)
         },
-        showQR:function(title,url,code){
-          window.open('/controll/showqr?title='+title+'&code='+code+'&url='+url,'_blank')
+        showQR:function(title,type,code){
+          window.open('/controll/showqr?title='+title+'&code='+code+'&type='+type,'_blank')
         },
         postCreate:function(){
           this.creatingPoll = false
