@@ -13,7 +13,7 @@
       <div class="vote_area">
         <div class="vote_title"><%= title %></div>
         <div ref="bar" v-for="index of num" class="one_area">
-          <div class="survey_bar" :style="`height:${bars[index-1]}px;`"></div>
+          <div class="survey_bar" :class="{emphasizeBar: (emphasizedIndex==index-1)}":style="`height:${bars[index-1]}px;`"></div>
           {{counts[index-1]}}
         </div>
         <br/>
@@ -41,6 +41,7 @@
         bars:[300,300,300,300,300],
         voted:0,
         errorMessage: '',
+        emphasizedIndex:-1,
       },
       mounted() {
         this.resizeBar()
@@ -60,6 +61,11 @@
         })
         socket.on('switch',(url)=>{
           window.location.href=url
+        })
+        socket.on('emphasize',(emphasizedData)=>{
+          if(this.title === emphasizedData.title){
+            this.emphasizedIndex = emphasizedData.index
+          }
         })
       },
       beforeDestroy(){

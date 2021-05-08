@@ -149,10 +149,9 @@ module.exports = function(io) {
 
     router.get('/showqr',function(req,res,next){
         const title = req.query.title
-        const url = req.query.url
+        const type = req.query.type
         const code = req.query.code
 
-        const type = req.query.type
         let path = "/"
         if(type === "ALT"){
             path +="alt?title=" + encodeURI(title)
@@ -178,6 +177,18 @@ module.exports = function(io) {
             res.json({check:"OK"})
         }else{
             res.json({check:"NG"})
+        }
+    })
+
+    router.post('/emphasize',function(req,res,next){
+        const authkey = req.body.authkey
+        const title = req.body.title
+        const index = req.body.index
+        if(authkey === process.env.KEY){
+            io.emit('emphasize',{title:title,index:index})
+            res.json({auth:"OK"})
+        }else{
+            res.json({auth:"NG"})
         }
     })
 

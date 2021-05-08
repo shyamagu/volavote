@@ -12,8 +12,8 @@
     <div id="app">
       <div class="vote_area">
         <div class="vote_title"><%= title %></div>
-        <button class="yes_button" :class="{votedYesStyle: votedYes}" :style="`width:${sizeYes}px;height:${sizeYes}px`" @click.prevent="sayYes">Yes<br/>{{countYes}}</button>
-        <button class="no_button" :class="{votedNoStyle: votedNo}" :style="`width:${sizeNo}px;height:${sizeNo}px`" @click.prevent="sayNo">No</br>{{countNo}}</button>
+        <button class="yes_button" :class="{votedYesStyle: votedYes, emphasizeVote: (emphasizedIndex==0)}" :style="`width:${sizeYes}px;height:${sizeYes}px`" @click.prevent="sayYes">Yes<br/>{{countYes}}</button>
+        <button class="no_button"  :class="{votedNoStyle: votedNo,  emphasizeVote: (emphasizedIndex==1)}" :style="`width:${sizeNo}px;height:${sizeNo}px`" @click.prevent="sayNo">No</br>{{countNo}}</button>
       </div>
     </div>
   </body>
@@ -30,6 +30,7 @@
         countNo:0,
         sizeYes:100,
         sizeNo:100,
+        emphasizedIndex:-1,
       },
       mounted() {
         socket.emit('voting',this.title)
@@ -43,6 +44,11 @@
         })
         socket.on('switch',(url)=>{
           window.location.href=url
+        })
+        socket.on('emphasize',(emphasizedData)=>{
+          if(this.title === emphasizedData.title){
+            this.emphasizedIndex = emphasizedData.index
+          }
         })
       },
       methods:{

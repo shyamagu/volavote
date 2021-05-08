@@ -47,10 +47,24 @@
           <div class="result_line_switch":class="{current_line: box.CURRENT==true}"><button class="switch_button" :class="{current_line: box.CURRENT==true}" @click="switchTo(box.ID,getUrl(box))">{{box.CURRENT? "CURRENT":"SWITCH"}}</button></div>
           <div class="result_line_title" :class="{current_line: box.CURRENT==true}"><a :href="getUrl(box)" target="_blank" rel="noopener noreferrer">{{box.title}}</a></div>
           <div class="result_line_type"  :class="{current_line: box.CURRENT==true}">{{box.TYPE}}</div>
-          <div v-if="box.TYPE=='ALT'" class="result_line_result" :class="{current_line: box.CURRENT==true}">YES:{{box.YES}},NO:{{box.NO}}</div>
-          <div v-if="box.TYPE=='SURVEY'" class="result_line_result" :class="{current_line: box.CURRENT==true}">S1:{{box.S1}},S2:{{box.S2}},S3:{{box.S3}},S4:{{box.S4}},S5:{{box.S5}}</div>
+          <div v-if="box.TYPE=='ALT'" class="result_line_result" :class="{current_line: box.CURRENT==true}">
+            <span class="emphasize" @click="emphasizeVote(box.title,0)">YES</span>:{{box.YES}},
+            <span class="emphasize" @click="emphasizeVote(box.title,1)">NO</span>:{{box.NO}}
+          </div>
+          <div v-if="box.TYPE=='SURVEY'" class="result_line_result" :class="{current_line: box.CURRENT==true}">
+            <span class="emphasize" @click="emphasizeVote(box.title,0)">S1</span>:{{box.S1}},
+            <span class="emphasize" @click="emphasizeVote(box.title,1)">S2</span>:{{box.S2}},
+            <span class="emphasize" @click="emphasizeVote(box.title,2)">S3</span>:{{box.S3}},
+            <span class="emphasize" @click="emphasizeVote(box.title,3)">S4</span>:{{box.S4}},
+            <span class="emphasize" @click="emphasizeVote(box.title,4)">S5</span>:{{box.S5}}
+          </div>
           <div v-if="box.TYPE=='MAP'" class="result_line_result" :class="{current_line: box.CURRENT==true}">{{box.MAP.length}} points in MAP</div>
-          <div v-if="box.TYPE=='TEXT'" class="result_line_result" :class="{current_line: box.CURRENT==true}">{{Object.keys(box.MESSAGES).length}} messages</div>
+          <div v-if="box.TYPE=='TEXT'" class="result_line_result" :class="{current_line: box.CURRENT==true}">
+            {{Object.keys(box.MESSAGES).length}} messages, ->
+            <select v-model="emphasizedMessageIndexes[index]" @change="emphasizeVote(box.title,emphasizedMessageIndexes[index]-1)">
+              <option v-for="n of Object.keys(box.MESSAGES).length" v-bind:value="n">{{n}}</option>
+            </select>
+          </div>
           <div class="result_line_copy"><button class="copy_button" v-clipboard:copy="getFullUrl(box)">Copy URL</button></div>
           <div class="result_line_copy"><button class="copy_button" @click="showQR(box.title,box.TYPE,pollCode)">Show QR</button></div>
         </div>
@@ -161,7 +175,8 @@
         ],
         getControlled:false,
         creatingPoll:false,
-        pollCode:Array.from(Array(6)).map(()=>codeString[Math.floor(Math.random()*codeString.length)]).join('')
+        pollCode:Array.from(Array(6)).map(()=>codeString[Math.floor(Math.random()*codeString.length)]).join(''),
+        emphasizedMessageIndexes:[],
       },
       mounted() {
         socket.on('voting',(box)=>{
@@ -169,6 +184,24 @@
         })
       },
       methods:{
+        emphasizeVote:function(title,index){
+          fetch("/controll/emphasize",{
+            method:'POST',
+            headers:{'Content-Type':'application/json'},
+            body:JSON.stringify({authkey:this.authkey,title:title,index:index})
+          })
+          .then(response=>response.json())
+          .then(data=>{
+            if(data.auth==="OK"){
+            }else{
+              this.errorMessage = "Invalid key"
+              this.getControlled= false
+            }
+          })
+          .catch(error=>{
+            this.errorMessage = error
+          })
+        },
         checkAnonymous:function(flag){
           if(flag == this.anonymous) return
           if(flag==='true'){
