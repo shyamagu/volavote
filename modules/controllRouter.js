@@ -13,6 +13,10 @@ module.exports = function(io) {
         voteBox.setMetadata(title,"ALT",{})
     }
 
+    function makeNewMbQuizVote(title,maru,batsu){
+        voteBox.setMetadata(title,"MBQ",{"MARU":maru,"BATSU":batsu})
+    }
+
     function makeNewSurveyVote(title,num,d1,d2,d3,d4,d5){
         voteBox.setMetadata(title,"SURVEY",{"STEP":num,"D1":d1,"D2":d2,"D3":d3,"D4":d4,"D5":d5})
     }
@@ -61,6 +65,9 @@ module.exports = function(io) {
             
             if(type === "ALT"){
                 makeNewALTVote(title)
+            }else if(type === "MBQ"){
+                const displays = req.body.quiz2c
+                makeNewMbQuizVote(title,displays[0],displays[1])
             }else if(type === "SURVEY"){
                 let num = req.body.num
                 const ds = req.body.ds

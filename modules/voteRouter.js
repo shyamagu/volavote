@@ -42,6 +42,31 @@ module.exports = function(io) {
         }
     });
 
+    router.get('/mbq', function(req, res, next) {
+        const title = req.query.title
+        let maru = req.query.maru
+        let batsu= req.query.batsu
+        if(!maru) maru = "o"
+        if(!batsu)batsu= "x"
+
+        if(process.env.ANONYMOUS=="true"){
+            let checked = voteBox.checkPoll(title)
+            if(checked){
+                res.render('quizmb', { title: title, maru: checked.METADATA.MARU, batsu: checked.METADATA.BATSU});
+            }else{
+                makeNewMbQuizVote(title,maru,batsu)
+                res.render('quizmb', { title: title, maru: maru, batsu: batsu});
+            }
+        }else{
+            let checked = voteBox.checkPoll(title)
+            if(checked){
+                res.render('quizmb', { title: title, maru: checked.METADATA.MARU, batsu: checked.METADATA.BATSU});
+            }else{
+                next(createError(404));
+            }
+        }
+    });
+
     router.get('/survey', function(req, res, next) {
         const title = req.query.title
         const type  = req.query.type
@@ -140,6 +165,10 @@ module.exports = function(io) {
 
     function makeNewALTVote(title){
         voteBox.setMetadata(title,"ALT",{})
+    }
+
+    function makeNewMbQuizVote(title,maru,batsu){
+        voteBox.setMetadata(title,"MBQ",{"MARU":maru,"BATSU":batsu})
     }
 
     function makeNewSurveyVote(title,num,d1,d2,d3,d4,d5){

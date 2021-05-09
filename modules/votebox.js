@@ -71,6 +71,13 @@ class VoteBox {
             for(let key in result){
                 returnBox[result[key]] = (returnBox[result[key]])? returnBox[result[key]]+1 : 1;
             }
+        }else if(type === "MBQ"){
+            returnBox["MARU"]=0
+            returnBox["BATSU"]=0
+            let result = this.votebox[title]["RESULT"]
+            for(let key in result){
+                returnBox[result[key]] = (returnBox[result[key]])? returnBox[result[key]]+1 : 1;
+            }
         }else if(type === "SURVEY"){
             returnBox["STEP"]=this.votebox[title]["METADATA"]["STEP"]
             returnBox["S1"] =0

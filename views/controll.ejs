@@ -51,6 +51,10 @@
             <span class="emphasize" @click="emphasizeVote(box.title,0)">YES</span>:{{box.YES}},
             <span class="emphasize" @click="emphasizeVote(box.title,1)">NO</span>:{{box.NO}}
           </div>
+          <div v-if="box.TYPE=='MBQ'" class="result_line_result" :class="{current_line: box.CURRENT==true}">
+            <span class="emphasize" @click="emphasizeVote(box.title,0)">choice1</span>:{{box.MARU}},
+            <span class="emphasize" @click="emphasizeVote(box.title,1)">choice2</span>:{{box.BATSU}}
+          </div>
           <div v-if="box.TYPE=='SURVEY'" class="result_line_result" :class="{current_line: box.CURRENT==true}">
             <span class="emphasize" @click="emphasizeVote(box.title,0)">S1</span>:{{box.S1}},
             <span class="emphasize" @click="emphasizeVote(box.title,1)">S2</span>:{{box.S2}},
@@ -83,6 +87,19 @@
                 {{option.text}}
               </option>
             </select>
+          </div>
+          <div v-if="new_type=='MBQ'">
+            <div class="make_poll_item">STYLE</div>
+            <div class="make_poll_value">
+              <select class="make_poll_input" v-model="new_mbq_displays">
+                <option v-for="option in new_mbq_options" v-bind:value="option.value">
+                  {{option.text}}
+                </option>
+              </select>
+              or
+              <input class="make_poll_input" :style="`width:100px`" v-model="new_mbq_displays[0]" placeholder="ex)YES">
+              <input class="make_poll_input" :style="`width:100px`" v-model="new_mbq_displays[1]" placeholder="ex)NO">
+            </div>
           </div>
           <div v-if="new_type=='SURVEY'">
             <div class="make_poll_item">Steps</div>
@@ -126,7 +143,6 @@
               </select>
             </div>
           </div>
-
           <button class="make_poll_botton_create" @click="createPoll">Create Poll</button>
         </div>
       </div>
@@ -152,6 +168,7 @@
           {text: '2~5 Step Survey',value:'SURVEY'},
           {text: 'MAP',value:'MAP'},
           {text: 'TEXT',value:'TEXT'},
+          {text: '2-choice QUIZ',value:'MBQ'}
         ],
         new_step_num:5,
         new_step_options:[
@@ -173,6 +190,12 @@
           {text: '1 Person : 1 Message',value:"SINGLE"},
           {text: '1 Person : N Message',value:"MULTI"},
         ],
+        new_mbq_options:[
+          {text: '',value:""},
+          {text: 'o-x', value:["o","x"]},
+          {text: 'true-false', value:["true","false"]}
+        ],
+        new_mbq_displays:[],
         getControlled:false,
         creatingPoll:false,
         pollCode:Array.from(Array(6)).map(()=>codeString[Math.floor(Math.random()*codeString.length)]).join(''),
@@ -266,6 +289,7 @@
               image:this.new_map_image? this.new_map_image:this.new_map_image_url,
               width:this.new_map_image_width,
               constraint:this.new_text_type,
+              quiz2c:this.new_mbq_displays,
               })
           })
           .then(response => response.json())
@@ -349,6 +373,8 @@
         getUrl:function(box){
           if(box.TYPE==="ALT"){
             return "/alt?title="+box.title
+          }else if(box.TYPE==="MBQ"){
+            return "/mbq?title="+box.title
           }else if(box.TYPE==="SURVEY"){
             params = ""
             if(box.STEP!=5){ params += "&num="+box.STEP }
@@ -388,6 +414,7 @@
           this.new_map_image_url = ""
           this.new_map_image_width = 500
           this.new_text_type = "SINGLE"
+          this.new_mbq_displays = []
         },
         showResult:function(type){
           if(type==="all"){

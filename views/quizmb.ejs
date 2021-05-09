@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
+    <title><%= title %></title>
+    <script src="https://cdn.jsdelivr.net/npm/vue@2/dist/vue.js"></script>
+    <script src="/socket.io/socket.io.js"></script>
+    <link rel='stylesheet' href='/stylesheets/style.css' />
+  </head>
+  <body>
+    <div id="app">
+      <div class="vote_area">
+        <div class="vote_title"><%= title %></div>
+        <br>
+        <div class="marubatsu_block" :class="{emphasizeVote: (emphasizedIndex==0)}">
+          <button class="maru_button" :class="{votedMaruStyle: votedMaru}" @click.prevent="voteMaru">{{display_maru}}</button>
+          <div v-if="countMaru != 0" class="marubatsu_count">
+            {{countMaru}}
+          </div>
+        </div>
+        <div class="marubatsu_block" :class="{emphasizeVote: (emphasizedIndex==1)}">
+          <button class="batsu_button" :class="{votedBatsuStyle: votedBatsu}" @click.prevent="voteBatsu">{{display_batsu}}</button>
+          <div v-if="countBatsu != 0" class="marubatsu_count">
+            {{countBatsu}}
+          </div>
+        </div>
+      </div>
+  </div>
+  </body>
+  <script>
+    const socket = io();
+    var app = new Vue({
+      el: '#app',
+      data: {
+        title: '<%= title %>',
+        display_maru: '<%= maru %>',
+        display_batsu: '<%= batsu %>',
+        votedMaru:false,
+        votedBatsu:false,
+        errorMessage: '',
+        countMaru:0,
+        countBatsu:0,
+        emphasizedIndex:-1,
+      },
+      mounted() {
+        socket.emit('voting',this.title)
+        socket.on('voting',(box)=>{
+          if(this.title === box.title){
+            this.countMaru = box.MARU
+            this.countBatsu = box.BATSU
+          }
+        })
+        socket.on('switch',(url)=>{
+          window.location.href=url
+        })
+        socket.on('emphasize',(emphasizedData)=>{
+          if(this.title === emphasizedData.title){
+            this.emphasizedIndex = emphasizedData.index
+          }
+        })
+      },
+      methods:{
+        voteMaru: function(){
+          this.vote({title:this.title, vote:"MARU", type:"MBQ"})
+          this.votedMaru = true
+          this.votedBatsu = false
+        },
+        voteBatsu: function(){
+          this.vote({title:this.title, vote:"BATSU", type:"MBQ"})
+          this.votedMaru = false
+          this.votedBatsu = true
+        },
+        vote:function(vote){
+          fetch("/vote",{
+            method:'POST',
+            headers:{'Content-Type':'application/json'},
+            body:JSON.stringify(vote)
+          })
+          .then(response=>{
+            //OK
+          })
+          .catch((error)=>{
+            this.errorMessage = error
+          });
+        },
+      }
+    })
+  </script>
+</html>
