@@ -379,13 +379,18 @@ body {
   outline:solid 20px #FF0;
 }
 
+.emphasizeAnswer{
+  background-color: #FF9;
+  border-radius:20%;
+}
+
 .marubatsu_block{
   vertical-align:top;
   display: inline-block;
   width:300px;
   height:300px;
   font-size: 30px;
-  margin: 20px auto auto auto;
+  margin: auto auto auto auto;
 }
 
 .maru_button{
@@ -397,9 +402,9 @@ body {
   appearance: none;
   font-size:100px;
   font-weight: bold;
-  color:#99F;
+  color:#CCF;
   width:100%;
-  height:200px;
+  height:150px;
 }
 
 .batsu_button{
@@ -411,14 +416,14 @@ body {
   appearance: none;
   font-size:100px;
   font-weight: bold;
-  color:#F99;
+  color:#FCC;
   width:100%;
-  height:200px;
+  height:150px;
 }
 
 .marubatsu_count{
   color:#999;
-  margin:5px;
+  margin:30px;
 }
 
 .votedMaruStyle{

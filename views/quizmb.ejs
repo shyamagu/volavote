@@ -13,15 +13,15 @@
       <div class="vote_area">
         <div class="vote_title"><%= title %></div>
         <br>
-        <div class="marubatsu_block" :class="{emphasizeVote: (emphasizedIndex==0)}">
-          <button class="maru_button" :class="{votedMaruStyle: votedMaru}" @click.prevent="voteMaru">{{display_maru}}</button>
-          <div v-if="countMaru != 0" class="marubatsu_count">
+        <div ref="maruZone" class="marubatsu_block" :class="{emphasizeAnswer: (emphasizedIndex==0)}">
+          <button class="maru_button" :class="{votedMaruStyle: votedMaru}" :style="`font-size:${this.display_maru_font_size}px;`" @click.prevent="voteMaru">{{display_maru}}</button>
+          <div class="marubatsu_count">
             {{countMaru}}
           </div>
         </div>
-        <div class="marubatsu_block" :class="{emphasizeVote: (emphasizedIndex==1)}">
-          <button class="batsu_button" :class="{votedBatsuStyle: votedBatsu}" @click.prevent="voteBatsu">{{display_batsu}}</button>
-          <div v-if="countBatsu != 0" class="marubatsu_count">
+        <div class="marubatsu_block" :class="{emphasizeAnswer: (emphasizedIndex==1)}">
+          <button class="batsu_button" :class="{votedBatsuStyle: votedBatsu}" :style="`font-size:${this.display_batsu_font_size}px;`" @click.prevent="voteBatsu">{{display_batsu}}</button>
+          <div class="marubatsu_count">
             {{countBatsu}}
           </div>
         </div>
@@ -36,6 +36,10 @@
         title: '<%= title %>',
         display_maru: '<%= maru %>',
         display_batsu: '<%= batsu %>',
+        display_maru_font_size: 20,
+        display_batsu_font_size:20,
+        maru_font_size:20,
+        batsu_font_size:20,
         votedMaru:false,
         votedBatsu:false,
         errorMessage: '',
@@ -44,6 +48,9 @@
         emphasizedIndex:-1,
       },
       mounted() {
+        this.resizeFont()
+        window.addEventListener('resize',this.resizeFont)
+
         socket.emit('voting',this.title)
         socket.on('voting',(box)=>{
           if(this.title === box.title){
@@ -60,9 +67,27 @@
           }
         })
       },
+      beforeDestroy(){
+        window.removeEventListener('resize',this.resizeFont)
+      },
       methods:{
+        resizeFont: function(){
+          let maru_width = this.$refs.maruZone.clientWidth
+          let maru_length= this.display_maru.length
+          let batsu_length=this.display_batsu.length
+
+          this.display_maru_font_size = maru_width*0.7/maru_length
+          this.display_batsu_font_size = maru_width*0.7/batsu_length
+
+          if(this.display_maru_font_size<=50) this.display_maru_font_size = 50
+          if(this.display_batsu_font_size<=50) this.display_batsu_font_size = 50
+
+          if(this.display_maru_font_size < this.display_batsu_font_size) this.display_batsu_font_size = this.display_maru_font_size
+          if(this.display_batsu_font_size< this.display_maru_font_size)  this.display_maru_font_size = this.display_batsu_font_size
+        },
         voteMaru: function(){
           this.vote({title:this.title, vote:"MARU", type:"MBQ"})
+
           this.votedMaru = true
           this.votedBatsu = false
         },
