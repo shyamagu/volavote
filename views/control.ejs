@@ -3,7 +3,7 @@
   <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width">
-    <title>volavote controll page</title>
+    <title>volavote control page</title>
     <script src="https://cdn.jsdelivr.net/npm/vue@2/dist/vue.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/vue-clipboard2@0.3.1/dist/vue-clipboard.min.js"></script>
     <script src="/socket.io/socket.io.js"></script>
@@ -12,9 +12,9 @@
   <body>
     <div id="app">
       <div class="vote_area">
-        <div class="vote_title">volavote controll page</div>
-        <div class="input_key" v-if="!getControlled">KEY: <input id="volavotekey" v-model="authkey" type="password" autocomplete="none"><button @click="getControll">GET CONTROLL</button></div>
-        <div class="input_key" v-if="getControlled">
+        <div class="vote_title">volavote control page</div>
+        <div class="input_key" v-if="!getControled">KEY: <input id="volavotekey" v-model="authkey" type="password" autocomplete="none"><button @click="getControl">GET CONTROL</button></div>
+        <div class="input_key" v-if="getControled">
           <div class="options">
             Anonymous create poll: 
             <input type="radio" id="enable"  v-model="anonymous" value="true" @click="checkAnonymous('true')"><label for="enable">Enable</label>
@@ -23,7 +23,7 @@
           <div v-if="anonymous=='false'" class="options">
             Require poll CODE:
             <input type="radio" id="enable"  v-model="requireCode" value="true" @click="applyRequireCode()"><label for="enable">Enable</label>
-            <input type="radio" id="disable" v-model="requireCode" value="false" @click="changeRequireCode()"><label for="disable">Disable</label>
+            <input type="radio" id="disable" v-model="requireCode" value="false" @click="disableRequireCode()"><label for="disable">Disable</label>
           </div>
           <div class="code_input" v-if="requireCode == 'true'">
             {{pollCode}}
@@ -73,7 +73,7 @@
           <div class="result_line_copy"><button class="copy_button" @click="showQR(box.title,box.TYPE,pollCode)">Show QR</button></div>
         </div>
       </div>
-      <div v-if="getControlled" class="making_area">
+      <div v-if="getControled" class="making_area">
         <button v-if="!creatingPoll" class="make_poll_botton_new" @click="startToCreateNewPoll">+</button>
         <div v-if="creatingPoll" class="create_area">
           <div class="make_poll_item">Poll Title</div>
@@ -196,19 +196,19 @@
           {text: 'true-false', value:["true","false"]}
         ],
         new_mbq_displays:[],
-        getControlled:false,
+        getControled:false,
         creatingPoll:false,
-        pollCode:Array.from(Array(6)).map(()=>codeString[Math.floor(Math.random()*codeString.length)]).join(''),
+        pollCode:"",
         emphasizedMessageIndexes:[],
       },
       mounted() {
         socket.on('voting',(box)=>{
-          this.getControll()
+          this.getControl()
         })
       },
       methods:{
         emphasizeVote:function(title,index){
-          fetch("/controll/emphasize",{
+          fetch("/control/emphasize",{
             method:'POST',
             headers:{'Content-Type':'application/json'},
             body:JSON.stringify({authkey:this.authkey,title:title,index:index})
@@ -218,7 +218,7 @@
             if(data.auth==="OK"){
             }else{
               this.errorMessage = "Invalid key"
-              this.getControlled= false
+              this.getControled= false
             }
           })
           .catch(error=>{
@@ -233,7 +233,7 @@
           }
 
           this.errorMessage = ""
-          fetch("/controll/anonymous",{
+          fetch("/control/anonymous",{
             method:'POST',
             headers:{'Content-Type':'application/json'},
             body:JSON.stringify({authkey:this.authkey,anonymous:(flag==="true")})
@@ -243,7 +243,7 @@
             if(data.auth==="OK"){
             }else{
               this.errorMessage = "Invalid key"
-              this.getControlled= false
+              this.getControled= false
             }
           })
           .catch(error=>{
@@ -251,8 +251,16 @@
           })
         },
         applyRequireCode:function(){
+          this.pollCode = Array.from(Array(6)).map(()=>codeString[Math.floor(Math.random()*codeString.length)]).join('')
+          this.setRequireCode()
+        },
+        disableRequireCode:function(){
+          this.pollCode = ""
+          this.setRequireCode()
+        },
+        setRequireCode:function(){
           this.errorMessage = ""
-          fetch("/controll/code",{
+          fetch("/control/code",{
             method:'POST',
             headers:{'Content-Type':'application/json'},
             body:JSON.stringify({authkey:this.authkey,code:this.pollCode})
@@ -262,22 +270,20 @@
             if(data.auth==="OK"){
             }else{
               this.errorMessage = "Invalid key"
-              this.getControlled= false
+              this.getControled= false
             }
           })
           .catch(error=>{
             this.errorMessage = error
           })
-        },
-        changeRequireCode:function(){
-          this.pollCode = Array.from(Array(6)).map(()=>codeString[Math.floor(Math.random()*codeString.length)]).join('')
+
         },
         startToCreateNewPoll:function(){
           this.creatingPoll = true
         },
         createPoll:function(){
           this.errorMessage = ""
-          fetch("/controll/create",{
+          fetch("/control/create",{
             method:'POST',
             headers:{'Content-Type':'application/json'},
             body:JSON.stringify({
@@ -304,7 +310,7 @@
               this.postCreate();
             }else{
               this.errorMessage = "Invalid key"
-              this.getControlled = false;
+              this.getControled = false;
             }
 //            socket.emit('voting',this.title)
           })
@@ -312,9 +318,9 @@
             this.errorMessage = error
           })
         },
-        getControll: function(){
+        getControl: function(){
           this.errorMessage = ""
-          fetch("/controll/get",{
+          fetch("/control/get",{
             method:'POST',
             headers:{'Content-Type':'application/json'},
             body:JSON.stringify({authkey:this.authkey})
@@ -333,21 +339,21 @@
               }else{
                 this.errorMessage="There is No poll"
               }
-              this.getControlled = true
+              this.getControled = true
             }else{
               this.errorMessage = "Invalid key"
-              this.getControlled = false;
+              this.getControled = false;
             }
 //            socket.emit('voting',this.title)
           })
           .catch(error=>{
-            this.getControlled = false;
+            this.getControled = false;
             this.errorMessage = error
           })
         },
         switchTo:function(id,url){
           this.errorMessage = ""
-          fetch("/controll/switch",{
+          fetch("/control/switch",{
             method:'POST',
             headers:{'Content-Type':'application/json'},
             body:JSON.stringify({authkey:this.authkey,url:url,id:id})
@@ -372,9 +378,9 @@
         },
         getUrl:function(box){
           if(box.TYPE==="ALT"){
-            return "/alt?title="+box.title
+            return "/alt?title="+encodeURI(box.title)
           }else if(box.TYPE==="MBQ"){
-            return "/mbq?title="+box.title
+            return "/mbq?title="+encodeURI(box.title)
           }else if(box.TYPE==="SURVEY"){
             params = ""
             if(box.STEP!=5){ params += "&num="+box.STEP }
@@ -383,15 +389,15 @@
             if(box.D3){ params += "&d3="+box.D3 }
             if(box.D4){ params += "&d4="+box.D4 }
             if(box.D5){ params += "&d5="+box.D5 }
-            return "/survey?title="+box.title+params
+            return "/survey?title="+encodeURI(box.title)+params
           }else if(box.TYPE==="MAP"){
             params = ""
             params += "&image=" + box.IMG
             params += "&width=" + box.IMG_w
-            return "/map?title="+box.title+params
+            return "/map?title="+encodeURI(box.title)+params
           }else if(box.TYPE==="TEXT"){
             params = ""
-            return "/text?title="+box.title+"&constraint="+box.CONSTRAINT
+            return "/text?title="+encodeURI(box.title)+"&constraint="+box.CONSTRAINT
           }
           return "/"
         },
@@ -402,7 +408,7 @@
           return protocol+"//"+host+this.getUrl(box)
         },
         showQR:function(title,type,code){
-          window.open('/controll/showqr?title='+title+'&code='+code+'&type='+type,'_blank')
+          window.open('/control/showqr?title='+title+'&code='+code+'&type='+type,'_blank')
         },
         postCreate:function(){
           this.creatingPoll = false
@@ -418,14 +424,14 @@
         },
         showResult:function(type){
           if(type==="all"){
-            window.open('/controll/result?type=all&authkey='+this.authkey,'_blank')
+            window.open('/control/result?type=all&authkey='+this.authkey,'_blank')
           }else if(type==="countup"){
-            window.open('/controll/result?type=countup&authkey='+this.authkey,'_blank')
+            window.open('/control/result?type=countup&authkey='+this.authkey,'_blank')
           }
         },
         downloadResult:function(type){
           if(type==="all"){
-            fetch("/controll/getall",{
+            fetch("/control/getall",{
               method:'POST',
               headers:{'Content-Type':'application/json'},
               body:JSON.stringify({authkey:this.authkey})
@@ -459,7 +465,7 @@
             const reader = new FileReader();
             reader.onload = e =>{
               let importedJson = JSON.parse(e.target.result)
-              fetch("/controll/replace",{
+              fetch("/control/replace",{
               method:'POST',
               headers:{'Content-Type':'application/json'},
               body:JSON.stringify({authkey:this.authkey,box:importedJson})

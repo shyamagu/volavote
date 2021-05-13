@@ -46,16 +46,17 @@ var io = require('socket.io')(server)
 var socketio = require('./modules/votesocketio')
 socketio(io)
 
-var controllRouter = require('./modules/controllRouter')(io)
+var controlRouter = require('./modules/controlRouter')(io)
 var voteRouter = require('./modules/voteRouter')(io)
 
-app.use('/controll',controllRouter)
+app.use('/control',controlRouter)
 app.use('/',voteRouter)
 
 // catch 404 and forward to error handler
 app.use(function(req, res, next) {
   next(createError(404));
 });
+
 
 // error handler
 app.use(function(err, req, res, next) {

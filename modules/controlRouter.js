@@ -30,7 +30,7 @@ module.exports = function(io) {
     }
 
     router.get('/',function(req,res,next){
-        res.render('controll')
+        res.render('control')
     })
 
     router.post('/get',function(req,res,next){
