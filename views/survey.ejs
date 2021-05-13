@@ -50,13 +50,18 @@
         socket.emit('voting',this.title)
         socket.on('voting',(box)=>{
           if(this.title === box.title){
-            const ss = [Number(box.S1),Number(box.S2),Number(box.S3),Number(box.S4),Number(box.S5)]
-            let total = ss.reduce(function(sum,element){
+            this.counts=[Number(box.S1),Number(box.S2),Number(box.S3),Number(box.S4),Number(box.S5)]
+            this.save_total = this.counts.reduce(function(sum,element){
               return sum+element;
             },0)
-            this.save_total = total
-            this.counts=[Number(box.S1),Number(box.S2),Number(box.S3),Number(box.S4),Number(box.S5)]
-            this.bars=[this.maxh-Number(box.S1)*this.maxh/total,this.maxh-Number(box.S2)*this.maxh/total,this.maxh-Number(box.S3)*this.maxh/total,this.maxh-Number(box.S4)*this.maxh/total,this.maxh-Number(box.S5)*this.maxh/total]
+            let bar_height = this.maxh
+            this.bars=[
+              bar_height-Number(box.S1)*bar_height/this.save_total,
+              bar_height-Number(box.S2)*bar_height/this.save_total,
+              bar_height-Number(box.S3)*bar_height/this.save_total,
+              bar_height-Number(box.S4)*bar_height/this.save_total,
+              bar_height-Number(box.S5)*bar_height/this.save_total
+              ]
           }
         })
         socket.on('switch',(url)=>{

@@ -25,8 +25,12 @@ class VoteBox {
         return true
     }
 
+//    static vote(title,sessionid,vote) {
+//        this.votebox[title]["RESULT"][sessionid]=vote
+//    }
+
     static vote(title,sessionid,vote) {
-        this.votebox[title]["RESULT"][sessionid]=vote
+        this.votebox[title]["RESULT"][sessionid+Date.now()]=vote
     }
 
     static voteMulti(title,sessionid,vote) {
