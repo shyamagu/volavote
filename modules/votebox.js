@@ -27,11 +27,10 @@ class VoteBox {
 
     static vote(title,sessionid,vote) {
         this.votebox[title]["RESULT"][sessionid]=vote
+//        for Test
+//        this.votebox[title]["RESULT"][sessionid+Date.now()]=vote
     }
 
-//    static vote(title,sessionid,vote) {
-//        this.votebox[title]["RESULT"][sessionid+Date.now()]=vote
-//    }
 
     static voteMulti(title,sessionid,vote) {
         this.votebox[title]["RESULT"][sessionid+Date.now()]=vote
@@ -99,6 +98,16 @@ class VoteBox {
             for(let key in result){
                 returnBox[result[key]] = (returnBox[result[key]])? returnBox[result[key]]+1 : 1;
             }
+        }else if(type === "MULTI"){
+            returnBox["NUM"]=this.votebox[title]["METADATA"]["NUM"]
+            returnBox["DS"]=this.votebox[title]["METADATA"]["DS"]
+            returnBox["CONSTRAINT"]=this.votebox[title]["METADATA"]["CONSTRAINT"]
+            let result = this.votebox[title]["RESULT"]
+            let countup = new Array(Number(returnBox["NUM"])).fill(0)
+            for(let key in result){
+                countup = result[key].map((el,index)=>countup[index]+=el)
+            }
+            returnBox["COUNTUP"]=countup
         }else if(type === "MAP"){
             returnBox["IMG"] =this.votebox[title]["METADATA"]["IMG"]
             returnBox["IMG_w"] =this.votebox[title]["METADATA"]["IMG_w"]

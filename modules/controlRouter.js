@@ -21,6 +21,10 @@ module.exports = function(io) {
         voteBox.setMetadata(title,"SURVEY",{"STEP":num,"D1":d1,"D2":d2,"D3":d3,"D4":d4,"D5":d5})
     }
 
+    function makeNewMultiVote(title,num,ds,constraint){
+        voteBox.setMetadata(title,"MULTI",{"NUM":num,"DS":ds,"CONSTRAINT":constraint})
+    }
+
     function makeNewMapVote(title,image,width){
         voteBox.setMetadata(title,"MAP",{"IMG":image,"IMG_w":width})
     }
@@ -75,6 +79,14 @@ module.exports = function(io) {
                 if(num < 2 || num > 5) num=5
 
                 makeNewSurveyVote(title,num,ds[0],ds[1],ds[2],ds[3],ds[4],ds[5])
+            }else if(type === "MULTI"){
+                let num = req.body.new_multi_survey_num
+                let ds  = req.body.new_multi_survey_displays
+                let cons= req.body.new_multi_constraint
+
+                if(isNaN(num))num=5
+                if(!ds) ds = []
+                makeNewMultiVote(title,num,ds,cons)
             }else if(type === "MAP"){
                 let image = req.body.image
                 const width = req.body.width

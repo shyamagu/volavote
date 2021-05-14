@@ -157,12 +157,12 @@ body {
 .message_post_button{
   width:100px;
   height:72px;
-  background-color: #9C9;
+  background-color: #99F;
 }
 
 .message_post_button:disabled{
   cursor: default;
-  color: #9C9;
+  color: #669;
   opacity: 0.6;
 }
 
@@ -195,7 +195,7 @@ body {
   display: inline-block;
   width:70px;
   height:64px;
-  background-color: #9C9;
+  background-color: #99F;
 }
 
 .agree_number_area{
@@ -205,8 +205,8 @@ body {
   font-size: 24px;
   height:64px;
   width:70px;
-  background-color: #9C9;
-  border:solid 1px #9C9;
+  background-color: #CCF;
+  border:solid 1px #CCF;
 }
 
 .list_message_area{
@@ -219,11 +219,11 @@ body {
   white-space: pre-wrap;
   overflow: auto;
   line-height: 16px;
-  border:solid 1px #9C9;
+  border:solid 1px #99F;
 }
 
 .same_message_area{
-  background-color: #CFC;
+  background-color: #CCF;
 }
 
 .v-enter-active, .v-leave-active {
@@ -286,6 +286,12 @@ body {
 .make_poll_input{
   font-size: 20px;
   margin-left:5px;
+}
+
+.make_poll_input_number{
+  font-size: 20px;
+  margin-left:5px;
+  width:100px;
 }
 
 .make_poll_botton_new{
@@ -462,10 +468,6 @@ body {
   transition-duration: .3s
 }
 
-.emphasizeBar{
-  background-color: #FF6;
-}
-
 .survey_button_area{
   width:160px;
 }
@@ -491,10 +493,58 @@ body {
   background: blue;
 }
 
+.space{
+  margin:50px;
+}
+
+.multi_survey_line_area{
+  text-align: left;
+  width:650px;
+  height:70px;
+  background-color: #FFF;
+  margin:auto;
+}
+
+.multi_survey_button_area{
+  vertical-align:middle;
+  display: inline-block;
+  width:250px;
+  height:70px;
+}
+.multi_survey_button{
+  width:240px;
+  height:60px;
+  font-size:20px;
+  background:#CCF;
+  margin-top:5px;
+  border:none;
+}
+
+.multi_survey_button_on{
+  background-color: #00F;
+  color:#FFF;
+}
+
+.multi_survey_bar_area{
+  vertical-align: middle;
+  display: inline-block;
+  width: 0px;
+  font-size: 16px;
+  color: #000;
+  background-color: #99F;
+  text-align: right;
+  padding:10px 0px 10px 0px;
+  transition-duration: .3s
+}
+
 .map_area{
   margin:auto;
   margin-top:50px;
   position: relative;
+}
+
+.emphasizeBar{
+  background-color: #FF6;
 }
 
 @keyframes pin_animation{
@@ -540,10 +590,6 @@ body {
     background-color: #CCC;
   }
 
-  .emphasizeBar{
-    background-color: #FF6;
-  }
-  
   .survey_button_area{
     width:60px;
   }
@@ -643,6 +689,30 @@ body {
 
   .votedBatsuStyle{
     font-size:80px;
+  }
+
+  .space{
+    margin:20px;
+  }
+
+  .multi_survey_line_area{
+    width:320px;
+  }
+  
+  .multi_survey_button_area{
+    width:130px;
+  }
+  .multi_survey_button{
+    width:120px;
+    font-size: 16px;
+  }
+  
+  .multi_survey_bar_area{
+    width: 0px;
+  }
+
+  .emphasizeBar{
+    background-color: #FF6;
   }
 
 }

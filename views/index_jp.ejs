@@ -11,9 +11,9 @@
       <div class="explain_title"><%= title %></div>
       <div class="explain_sub_title_underline">Simple volatile voting web application</div>
       <div class="explain_sub_title">
-        4種類の投票サイトを作成して、そのURLを共有して使うことができます(下図参考)
+        6種類の投票サイトを作成して、そのURLを共有して使うことができます(下図参考)
         <br>
-        ※サーバのダウンとともにデータは失われます（永続化していないです。）
+        ※サーバのダウンとともにデータは失われます（永続化してません）
       </div>
       <div class="explain_sub_title">
         <a href="<%=url %>control">管理画面</a> で新しい投票サイトを作成できます。(初期キーは'1234'です。環境変数(process.env.KEY)で指定することができます)
@@ -22,21 +22,30 @@
       </div>
 
       <div class="explain_block">
-        <div class="explain_survey">YES-NO</div>
+        <div class="explain_survey">YES or NO</div>
         <img src="/images/yesno_sample.png" width=180>
       </div>
       <div class="explain_block">
-        <div class="explain_survey">N-Step</div>
-        <img src="/images/multi_sample.png" width=180>
+        <div class="explain_survey">サーベイ</div>
+        <img src="/images/survey_sample.png" width=180>
       </div>
       <div class="explain_block">
-        <div class="explain_survey">MAP</div>
+        <div class="explain_survey">地図</div>
         <img src="/images/map_sample.png" width=130>
       </div>
       <div class="explain_block">
-        <div class="explain_survey">Free-Text</div>
+        <div class="explain_survey">複数選択</div>
+        <img src="/images/multi_sample.png" width=180>
+      </div>
+      <div class="explain_block">
+        <div class="explain_survey">自由記入</div>
         <img src="/images/text_sample.png" width=180>
       </div>
+      <div class="explain_block">
+        <div class="explain_survey">２択クイズ</div>
+        <img src="/images/quiz_sample.png" width=180>
+      </div>
+
     </div>
     <div class="explain_area">
       <div class="explain_appendix">もしご自身で本サイトをホストしたければ、Docker Hub の Imageは <a href="https://hub.docker.com/repository/docker/shyamagu/volavote">shyamagu/volavote</a> を使って下さい

@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
+    <title><%= title %></title>
+    <script src="https://cdn.jsdelivr.net/npm/vue@2/dist/vue.js"></script>
+    <script src="/socket.io/socket.io.js"></script>
+    <link rel='stylesheet' href='/stylesheets/style.css' />
+  </head>
+  <body>
+    <div id="app">
+      <div class="vote_area">
+        <div class="vote_title"><%= title %></div>
+        <div class="space"></div>
+        <div ref="area" v-for="index of num" :key=index class="multi_survey_line_area" :class="{emphasizeBar: (emphasizedIndex==index-1)}">
+          <div class="multi_survey_button_area">
+            <button class="multi_survey_button" :class="{multi_survey_button_on: voted[index-1]}" @click="vote(index-1)">{{displays[index-1]? displays[index-1]:""}}</button>
+          </div>
+          <div class="multi_survey_bar_area" :style="`width:${bars[index-1]}px;`">
+            {{counts[index-1]}}&nbsp;
+          </div>
+        </div>
+<!--
+        <div ref="bar" v-for="index of num" class="one_area">
+          <div class="survey_bar" :class="{emphasizeBar: (emphasizedIndex==index-1)}":style="`height:${bars[index-1]}px;`"></div>
+          {{counts[index-1]}}
+        </div>
+        <br/>
+        <div v-for="index of num" class="button_area">
+          <button class="survey_button" :class="{survey_button_on: voted==index}" @click.prevent="voteSurvey(index)">{{displays[index-1]}}</button>
+        </div>
+
+          <button class="yes_button" :class="{votedYesStyle: votedYes}" :style="`width:${sizeYes}px;height:${sizeYes}px`" @click.prevent="sayYes">Yes<br/>{{countYes}}</button>
+        <button class="no_button" :class="{votedNoStyle: votedNo}" :style="`width:${sizeNo}px;height:${sizeNo}px`" @click.prevent="sayNo">No</br>{{countNo}}</button>
+-->
+      </div>
+    </div>
+  </body>
+  <script>
+    const socket = io();
+    var app = new Vue({
+      el: '#app',
+      data: {
+        title: '<%= title %>',
+        num: Number('<%= num %>'),
+        counts:[],
+        voted:[],
+        bars:[],
+        displays:JSON.parse('<%-JSON.stringify(ds)%>'),
+        constraint:'<%= constraint %>',
+        bar_max_length:0,
+        errorMessage: '',
+        emphasizedIndex:-1,
+      },
+      mounted() {
+        this.counts = new Array(this.num).fill(0)
+        this.voted = new Array(this.num).fill(false)
+        this.bars = new Array(this.num).fill(0)
+        this.resizeBar()
+        window.addEventListener('resize',this.resizeBar)
+
+        socket.emit('voting',this.title)
+        socket.on('voting',(box)=>{
+          if(this.title === box.title){
+            this.counts = box.COUNTUP
+            this.resizeBar()
+          }
+        })
+        socket.on('switch',(url)=>{
+          window.location.href=url
+        })
+        socket.on('emphasize',(emphasizedData)=>{
+          if(this.title === emphasizedData.title){
+            this.emphasizedIndex = emphasizedData.index
+          }
+        })
+      },
+      beforeDestroy(){
+        window.removeEventListener('resize',this.resizeBar)
+      },
+      methods:{
+        resizeBar: function(){
+          const barLength = this.$refs.area[0].clientWidth
+          if(barLength==650){
+            this.bar_max_length = 390
+          }else{
+            this.bar_max_length = 180
+          }
+          let max_count = this.counts.reduce((a,b)=>Math.max(a,b))
+          if(max_count==0)max_count=1
+          this.bars = this.counts.map(el=>el*this.bar_max_length/max_count)
+        },
+        vote:function(index){
+          const flag = this.voted[index]? !this.voted[index]: true
+          this.$set(this.voted,index,flag)
+
+          let mapped
+          if(this.constraint==="SINGLE"){
+            this.voted = new Array(this.num).fill(false)
+            this.$set(this.voted,index,flag)
+            mapped = this.voted.map(check=> check? 1:0)
+          }else{
+            mapped = this.voted.map(check=> check? 1:0)
+          }
+          const vote = {title:this.title, vote:mapped, type:"MULTI"}
+          fetch("/vote",{
+            method:'POST',
+            headers:{'Content-Type':'application/json'},
+            body:JSON.stringify(vote)
+          })
+          .then(response=>{
+            //OK
+          })
+          .catch((error)=>{
+            this.errorMessage = error
+          });
+        },
+      }
+    })
+  </script>
+</html>

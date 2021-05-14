@@ -94,8 +94,34 @@ module.exports = function(io) {
                 next(createError(404));
             }
         }
-
     });
+
+    router.get('/multi', function(req, res, next) {
+        const title = req.query.title
+        const type  = req.query.type
+        let num = req.query.num
+        if(isNaN(num)) num = 5
+        const constraint = req.query.constraint
+        const ds = req.query.ds? JSON.parse(req.query.ds) : []
+
+        if(process.env.ANONYMOUS=="true"){
+            let checked = voteBox.checkPoll(title)
+            if(checked){
+                res.render('multi', { title: title, num:checked.METADATA.NUM, ds:checked.METADATA.DS, constraint:checked.METADATA.CONSTRAINT});
+            }else{
+                makeNewMultiVote(title,num,ds,constraint)
+                res.render('multi', { title: title, num:num, ds:ds, constraint:constraint});
+            }
+        }else{
+            let checked = voteBox.checkPoll(title)
+            if(checked){
+                res.render('multi', { title: title, num:checked.METADATA.NUM, ds:checked.METADATA.DS, constraint:checked.METADATA.CONSTRAINT});
+            }else{
+                next(createError(404));
+            }
+        }
+    });
+
 
     router.get('/map', function(req, res, next) {
         const title = req.query.title
@@ -173,6 +199,10 @@ module.exports = function(io) {
 
     function makeNewSurveyVote(title,num,d1,d2,d3,d4,d5){
         voteBox.setMetadata(title,"SURVEY",{"STEP":num,"D1":d1,"D2":d2,"D3":d3,"D4":d4,"D5":d5})
+    }
+
+    function makeNewMultiVote(title,num,ds,constraint){
+        voteBox.setMetadata(title,"MULTI",{"NUM":num,"DS":ds,"CONSTRAINT":constraint})
     }
 
     function makeNewMapVote(title,image,width){

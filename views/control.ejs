@@ -62,6 +62,11 @@
             <span class="emphasize" @click="emphasizeVote(box.title,3)">S4</span>:{{box.S4}},
             <span class="emphasize" @click="emphasizeVote(box.title,4)">S5</span>:{{box.S5}}
           </div>
+          <div v-if="box.TYPE=='MULTI'" class="result_line_result" :class="{current_line: box.CURRENT==true}">
+            <span v-for="(key,index) in box.COUNTUP">
+              <span class="emphasize" @click="emphasizeVote(box.title,index)">C{{index+1}}:</span>{{key}},
+            </span> 
+          </div>
           <div v-if="box.TYPE=='MAP'" class="result_line_result" :class="{current_line: box.CURRENT==true}">{{box.MAP.length}} points in MAP</div>
           <div v-if="box.TYPE=='TEXT'" class="result_line_result" :class="{current_line: box.CURRENT==true}">
             {{Object.keys(box.MESSAGES).length}} messages, ->
@@ -117,6 +122,23 @@
               </div>
             </div>
           </div>
+          <div v-if="new_type=='MULTI'">
+            <div class="make_poll_item">Num of choice</div>
+            <div class="make_poll_value">
+              <input class="make_poll_input_number" type="number" v-model="new_multi_survey_num" />
+            </div>
+            <div class="make_poll_item_step">Msgs of choice</div>
+            <div class="make_poll_value" >
+              <div class="make_poll_input" v-for="num of Number(new_multi_survey_num)">
+                choice {{num}}:<input class="make_poll_input" size=25 v-model="new_multi_survey_displays[num-1]" type="text">
+              </div>
+            </div>
+            <div class="make_poll_item">Vote style</div>
+            <div class="make_poll_value" >
+              <input type="radio" id="enable"  v-model="new_multi_constraint" value=""><label for="enable">Multiple</label>
+              <input type="radio" id="disable" v-model="new_multi_constraint" value="SINGLE"><label for="disable">Single</label>
+            </div>
+          </div>
           <div v-if="new_type=='MAP'">
             <div class="make_poll_item">Image</div>
             <div class="make_poll_value">
@@ -165,6 +187,7 @@
         new_type:"ALT",
         new_type_options:[
           {text: 'YES/NO',value:'ALT'},
+          {text: 'Multi-choice',value:'MULTI'},
           {text: '2~5 Step Survey',value:'SURVEY'},
           {text: 'MAP',value:'MAP'},
           {text: 'TEXT',value:'TEXT'},
@@ -196,6 +219,9 @@
           {text: 'true-false', value:["true","false"]}
         ],
         new_mbq_displays:[],
+        new_multi_survey_num:5,
+        new_multi_survey_displays:[],
+        new_multi_constraint:"",
         getControled:false,
         creatingPoll:false,
         pollCode:"",
@@ -296,7 +322,10 @@
               width:this.new_map_image_width,
               constraint:this.new_text_type,
               quiz2c:this.new_mbq_displays,
-              })
+              new_multi_survey_num:this.new_multi_survey_num,
+              new_multi_survey_displays:this.new_multi_survey_displays,
+              new_multi_constraint:this.new_multi_constraint,
+            })
           })
           .then(response => response.json())
           .then(data=>{
@@ -390,6 +419,11 @@
             if(box.D4){ params += "&d4="+box.D4 }
             if(box.D5){ params += "&d5="+box.D5 }
             return "/survey?title="+encodeURI(box.title)+params
+          }else if(box.TYPE==="MULTI"){
+            params = ""
+            if(box.NUM) params += "&num=" + box.NUM
+            if(box.DS) params += "&ds=" + encodeURI(JSON.stringify(box.DS))
+            return "/multi?title="+encodeURI(box.title)+params
           }else if(box.TYPE==="MAP"){
             params = ""
             params += "&image=" + box.IMG
@@ -421,6 +455,9 @@
           this.new_map_image_width = 500
           this.new_text_type = "SINGLE"
           this.new_mbq_displays = []
+          this.new_multi_survey_num = 5
+          this.new_multi_survey_displays = []
+          this.new_multi_constraint = ""
         },
         showResult:function(type){
           if(type==="all"){
