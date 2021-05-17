@@ -9,12 +9,12 @@ module.exports = function(io) {
         next()
     })
 
-    function makeNewALTVote(title){
-        voteBox.setMetadata(title,"ALT",{})
+    function makeNewALTVote(title,image){
+        voteBox.setMetadata(title,"ALT",{"IMG":image})
     }
 
-    function makeNewMbQuizVote(title,maru,batsu){
-        voteBox.setMetadata(title,"MBQ",{"MARU":maru,"BATSU":batsu})
+    function makeNewMbQuizVote(title,maru,batsu,image){
+        voteBox.setMetadata(title,"MBQ",{"MARU":maru, "BATSU":batsu, "IMG":image})
     }
 
     function makeNewSurveyVote(title,num,d1,d2,d3,d4,d5){
@@ -68,10 +68,12 @@ module.exports = function(io) {
             const type  = req.body.type
             
             if(type === "ALT"){
-                makeNewALTVote(title)
+                const image = req.body.new_alt_image_url
+                makeNewALTVote(title,image)
             }else if(type === "MBQ"){
                 const displays = req.body.quiz2c
-                makeNewMbQuizVote(title,displays[0],displays[1])
+                const image = req.body.new_mbq_image_url
+                makeNewMbQuizVote(title,displays[0],displays[1],image)
             }else if(type === "SURVEY"){
                 let num = req.body.num
                 const ds = req.body.ds

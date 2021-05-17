@@ -105,6 +105,16 @@
               <input class="make_poll_input" :style="`width:100px`" v-model="new_mbq_displays[0]" placeholder="ex)YES">
               <input class="make_poll_input" :style="`width:100px`" v-model="new_mbq_displays[1]" placeholder="ex)NO">
             </div>
+            <div class="make_poll_item">Image (option)</div>
+            <div class="make_poll_value">
+              <input class="make_poll_input" v-model="new_mbq_image_url" placeholder="image url *option">
+            </div>
+          </div>
+          <div v-if="new_type=='ALT'">
+            <div class="make_poll_item">Image (option)</div>
+            <div class="make_poll_value">
+              <input class="make_poll_input" v-model="new_alt_image_url" placeholder="image url *option">
+            </div>
           </div>
           <div v-if="new_type=='SURVEY'">
             <div class="make_poll_item">Steps</div>
@@ -193,6 +203,7 @@
           {text: 'TEXT',value:'TEXT'},
           {text: '2-choice QUIZ',value:'MBQ'}
         ],
+        new_alt_image_url:"",
         new_step_num:5,
         new_step_options:[
           {text: '2',value:2},
@@ -219,6 +230,7 @@
           {text: 'true-false', value:["true","false"]}
         ],
         new_mbq_displays:[],
+        new_mbq_image_url:"",
         new_multi_survey_num:5,
         new_multi_survey_displays:[],
         new_multi_constraint:"",
@@ -316,12 +328,14 @@
               authkey:this.authkey,
               title:this.new_title,
               type:this.new_type,
+              new_alt_image_url:this.new_alt_image_url,
               num:this.new_step_num,
               ds:this.new_step_messages,
               image:this.new_map_image? this.new_map_image:this.new_map_image_url,
               width:this.new_map_image_width,
               constraint:this.new_text_type,
               quiz2c:this.new_mbq_displays,
+              new_mbq_image_url:this.new_mbq_image_url,
               new_multi_survey_num:this.new_multi_survey_num,
               new_multi_survey_displays:this.new_multi_survey_displays,
               new_multi_constraint:this.new_multi_constraint,
@@ -458,6 +472,8 @@
           this.new_multi_survey_num = 5
           this.new_multi_survey_displays = []
           this.new_multi_constraint = ""
+          this.new_alt_image_url = ""
+          this.new_mbq_image_url = ""
         },
         showResult:function(type){
           if(type==="all"){

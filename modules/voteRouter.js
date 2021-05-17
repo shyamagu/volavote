@@ -29,13 +29,15 @@ module.exports = function(io) {
 
     router.get('/alt', function(req, res, next) {
         const title = req.query.title
+        const image = req.query.image
+
         if(process.env.ANONYMOUS=="true"){
-            makeNewALTVote(title)
-            res.render('vote', { title: title});
+            makeNewALTVote(title,image)
+            res.render('vote', { title: title, image:image});
         }else{
             let checked = voteBox.checkPoll(title)
             if(checked){
-                res.render('vote', { title: title});
+                res.render('vote', { title: title, image: checked.METADATA.IMG});
             }else{
                 next(createError(404));
             }
@@ -48,19 +50,20 @@ module.exports = function(io) {
         let batsu= req.query.batsu
         if(!maru) maru = "o"
         if(!batsu)batsu= "x"
+        const image = req.query.image
 
         if(process.env.ANONYMOUS=="true"){
             let checked = voteBox.checkPoll(title)
             if(checked){
-                res.render('quizmb', { title: title, maru: checked.METADATA.MARU, batsu: checked.METADATA.BATSU});
+                res.render('quizmb', { title: title, maru: checked.METADATA.MARU, batsu: checked.METADATA.BATSU, image: checked.METADATA.IMG});
             }else{
-                makeNewMbQuizVote(title,maru,batsu)
-                res.render('quizmb', { title: title, maru: maru, batsu: batsu});
+                makeNewMbQuizVote(title,maru,batsu,image)
+                res.render('quizmb', { title: title, maru: maru, batsu: batsu, image:image});
             }
         }else{
             let checked = voteBox.checkPoll(title)
             if(checked){
-                res.render('quizmb', { title: title, maru: checked.METADATA.MARU, batsu: checked.METADATA.BATSU});
+                res.render('quizmb', { title: title, maru: checked.METADATA.MARU, batsu: checked.METADATA.BATSU, image: checked.METADATA.IMG});
             }else{
                 next(createError(404));
             }
@@ -189,12 +192,12 @@ module.exports = function(io) {
     });
 
 
-    function makeNewALTVote(title){
-        voteBox.setMetadata(title,"ALT",{})
+    function makeNewALTVote(title, image){
+        voteBox.setMetadata(title,"ALT",{"IMG":image})
     }
 
-    function makeNewMbQuizVote(title,maru,batsu){
-        voteBox.setMetadata(title,"MBQ",{"MARU":maru,"BATSU":batsu})
+    function makeNewMbQuizVote(title,maru,batsu,image){
+        voteBox.setMetadata(title,"MBQ",{"MARU":maru,"BATSU":batsu,"IMG":image})
     }
 
     function makeNewSurveyVote(title,num,d1,d2,d3,d4,d5){

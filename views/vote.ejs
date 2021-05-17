@@ -12,6 +12,9 @@
     <div id="app">
       <div class="vote_area">
         <div class="vote_title"><%= title %></div>
+        <div v-if="image_url">
+          <img class="alt_image" src=<%= image %> >
+        </div>
         <button class="yes_button" :class="{votedYesStyle: votedYes, emphasizeVote: (emphasizedIndex==0)}" :style="`width:${sizeYes}px;height:${sizeYes}px`" @click.prevent="sayYes">Yes<br/>{{countYes}}</button>
         <button class="no_button"  :class="{votedNoStyle: votedNo,  emphasizeVote: (emphasizedIndex==1)}" :style="`width:${sizeNo}px;height:${sizeNo}px`" @click.prevent="sayNo">No</br>{{countNo}}</button>
       </div>
@@ -23,6 +26,7 @@
       el: '#app',
       data: {
         title: '<%= title %>',
+        image_url : '<%= image %>',
         votedYes: false,
         votedNo : false,
         errorMessage: '',

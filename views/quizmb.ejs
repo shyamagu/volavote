@@ -12,7 +12,10 @@
     <div id="app">
       <div class="vote_area">
         <div class="vote_title"><%= title %></div>
-        <br>
+        <div v-if="!image_url">&nbsp;</div>
+        <div v-if="image_url">
+          <img class="mbq_image" src=<%= image %> >
+        </div>
         <div ref="maruZone" class="marubatsu_block" :class="{emphasizeAnswer: (emphasizedIndex==0)}">
           <button class="maru_button" :class="{votedMaruStyle: votedMaru}" :style="`font-size:${this.display_maru_font_size}px;`" @click.prevent="voteMaru">{{display_maru}}</button>
           <div class="marubatsu_count">
@@ -34,6 +37,7 @@
       el: '#app',
       data: {
         title: '<%= title %>',
+        image_url: '<%= image %>',
         display_maru: '<%= maru %>',
         display_batsu: '<%= batsu %>',
         display_maru_font_size: 20,

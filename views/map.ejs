@@ -13,8 +13,8 @@
       <div class="vote_area">
         <div class="vote_title"><%= title %></div>
         <div class="map_area" :style="`width:<%= width %>px`">
-          <img @click="onClickMap" src=<%= image %> width=<%= width %> border=5/>
-          <div v-for="position in positions":style="`position:absolute;top:${position[1]}px;left:${position[0]}px;pointer-events:none;`" >
+          <img @click="onClickMap" src=<%= image %> width=<%= width %> border=0/>
+          <div v-for="position in positions":style="`width:20px;height:20px;position:absolute;top:${position[1]-10}px;left:${position[0]-10}px;pointer-events:none;`" >
             <img class="map_pin_anime" src="/images/point.png"/>
           </div>
         </div>
