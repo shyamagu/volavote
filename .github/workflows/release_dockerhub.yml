@@ -1,4 +1,4 @@
-name: Publish Docker image shyamagu/volavote:v1
+name: Publish Docker image shyamagu/volavote:v1 to DockerHub
 on:
   release:
     types: [published]
