@@ -13,7 +13,7 @@
       <div class="vote_area">
         <div class="vote_title"><%= title %></div>
         <div ref="bar" v-for="index of num" class="one_area">
-          <div class="survey_bar" :class="{emphasizeBar: (emphasizedIndex==index-1)}":style="`height:${bars[index-1]}px;`"></div>
+          <div class="survey_bar" :class="{emphasizeBar: (emphasizedIndex==index-1)}" :style="`height:${bars[index-1]}px;`"></div>
           {{counts[index-1]}}
         </div>
         <br/>
@@ -54,14 +54,7 @@
             this.save_total = this.counts.reduce(function(sum,element){
               return sum+element;
             },0)
-            let bar_height = this.maxh
-            this.bars=[
-              bar_height-Number(box.S1)*bar_height/this.save_total,
-              bar_height-Number(box.S2)*bar_height/this.save_total,
-              bar_height-Number(box.S3)*bar_height/this.save_total,
-              bar_height-Number(box.S4)*bar_height/this.save_total,
-              bar_height-Number(box.S5)*bar_height/this.save_total
-              ]
+            this.resizeBar()
           }
         })
         socket.on('switch',(url)=>{
@@ -79,7 +72,14 @@
       methods:{
         resizeBar: function(){
           this.maxh = this.$refs.bar[0].clientHeight
-          this.bars=[this.maxh-this.counts[0]*this.maxh/this.save_total,this.maxh-this.counts[1]*this.maxh/this.save_total,this.maxh-this.counts[2]*this.maxh/this.save_total,this.maxh-this.counts[3]*this.maxh/this.save_total,this.maxh-this.counts[4]*this.maxh/this.save_total]
+
+          let max_count = this.counts.reduce((a,b)=>Math.max(a,b))
+          if(max_count==0)max_count=1
+          let adjust = 1.5
+          adjust = ( - max_count / 100.0 ) + 1.5
+          if(adjust < 1.1) adjust = 1.1
+          this.bars = this.counts.map(el=>this.maxh - el*this.maxh/(max_count*adjust))
+
         },
         voteSurvey: function(index){
           this.vote({title:this.title, vote:"S"+index, type:"SURVEY"})
