@@ -48,11 +48,9 @@ socketio(io)
 
 var controlRouter = require('./modules/controlRouter')(io)
 var voteRouter = require('./modules/voteRouter')(io)
-var playwrightRouter = require('./modules/playwrightRouter')
 
 app.use('/control',controlRouter)
 app.use('/',voteRouter)
-app.use('/playwright',playwrightRouter)
 
 // catch 404 and forward to error handler
 app.use(function(req, res, next) {

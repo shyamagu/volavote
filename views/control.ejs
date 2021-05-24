@@ -76,7 +76,6 @@
           </div>
           <div class="result_line_copy"><button class="copy_button" v-clipboard:copy="getFullUrl(box)">Copy URL</button></div>
           <div class="result_line_copy"><button class="copy_button" @click="showQR(box.title,box.TYPE,pollCode)">Show QR</button></div>
-          <div class="result_line_copy"><button class="copy_button" @click="saveImage(box.title)">Save Image</button></div>
         </div>
       </div>
       <div v-if="getControled" class="making_area">
@@ -458,21 +457,6 @@
         },
         showQR:function(title,type,code){
           window.open('/control/showqr?title='+title+'&code='+code+'&type='+type,'_blank')
-        },
-        saveImage:async function(title){
-
-          const response = await fetch("/playwright",{
-            method:'POST',
-            headers:{'Content-Type':'application/json'},
-            body:JSON.stringify({authkey:this.authkey,title:title})
-          })
-
-          const blob = await response.blob()
-          let link = document.createElement('a')
-          link.href = window.URL.createObjectURL(blob)
-          link.download = 'result_'+title+'_'+Date.now()+'.png'
-          link.click()
-
         },
         postCreate:function(){
           this.creatingPoll = false
