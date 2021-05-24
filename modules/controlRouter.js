@@ -176,8 +176,12 @@ module.exports = function(io) {
         let path = "/"
         if(type === "ALT"){
             path +="alt?title=" + encodeURI(title)
+        }else if(type === "MBQ"){
+            path +="mbq?title=" + encodeURI(title)
         }else if(type === "SURVEY"){
             path +="survey?title=" + encodeURI(title)
+        }else if(type === "MULTI"){
+            path +="multi?title=" + encodeURI(title)
         }else if(type === "MAP"){
             path +="map?title=" + encodeURI(title) 
         }else if(type === "TEXT"){

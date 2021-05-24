@@ -10,7 +10,7 @@
   </head>
   <body>
     <div id="app">
-      <div class="vote_area">
+      <div id="result" class="vote_area">
         <div class="vote_title"><%= title %></div>
         <div class="space"></div>
         <div ref="area" v-for="index of num" :key=index class="multi_survey_line_area" :class="{emphasizeBar: (emphasizedIndex==index-1)}">
@@ -21,19 +21,6 @@
             {{counts[index-1]}}&nbsp;
           </div>
         </div>
-<!--
-        <div ref="bar" v-for="index of num" class="one_area">
-          <div class="survey_bar" :class="{emphasizeBar: (emphasizedIndex==index-1)}":style="`height:${bars[index-1]}px;`"></div>
-          {{counts[index-1]}}
-        </div>
-        <br/>
-        <div v-for="index of num" class="button_area">
-          <button class="survey_button" :class="{survey_button_on: voted==index}" @click.prevent="voteSurvey(index)">{{displays[index-1]}}</button>
-        </div>
-
-          <button class="yes_button" :class="{votedYesStyle: votedYes}" :style="`width:${sizeYes}px;height:${sizeYes}px`" @click.prevent="sayYes">Yes<br/>{{countYes}}</button>
-        <button class="no_button" :class="{votedNoStyle: votedNo}" :style="`width:${sizeNo}px;height:${sizeNo}px`" @click.prevent="sayNo">No</br>{{countNo}}</button>
--->
       </div>
     </div>
   </body>
