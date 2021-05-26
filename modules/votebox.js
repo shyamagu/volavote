@@ -42,7 +42,7 @@ class VoteBox {
 
     static replace(box){
         this.votebox = box
-        this.id = 0
+        this.id = Object.keys(box).length + 1
         this.current = null
     }
 
